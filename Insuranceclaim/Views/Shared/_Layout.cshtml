@@ -1,0 +1,43 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - The Healthy Mind!</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <span class="navbar-brand logo">🧠 The Healthy Mind</span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon text-white"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link @(ViewBag.Page == "home" ? "active" : "")" href="@Url.Action("Index", "Home")">Home</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewBag.Page == "benefits" ? "active" : "")" href="@Url.Action("Benefits", "Home")">Benefits</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewBag.Page == "contact" ? "active" : "")" href="@Url.Action("Contact", "Home")">Contact</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewBag.Page == "login" ? "active" : "")" href="@Url.Action("Login", "Account")">Log in</a></li>
+                    <li class="nav-item"><a class="nav-link @(ViewBag.Page == "signup" ? "active" : "")" href="@Url.Action("SignUp", "Account")">Sign up</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid" id="main-content">
+        @RenderBody()
+    </div>
+
+    <footer>
+        <p>&copy; 2025 The Healthy Mind. All rights reserved.</p>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

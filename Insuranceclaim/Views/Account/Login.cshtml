@@ -1,0 +1,32 @@
+﻿@{
+    ViewData["Title"] = "Login";
+    ViewBag.Page = "login";
+}
+
+<div class="login-container">
+    <div class="login-box">
+        <div class="logo">
+            <span>The Healthy Mind</span>
+        </div>
+        <h4>Login</h4>
+        <form method="post" asp-controller="Account" asp-action="Login">
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+            }
+            <label>User Type</label>
+            <select name="usertype" id="usertype" class="form-control" required>
+                <option value="">-- Select User Type --</option>
+                <option value="agent">Agent</option>
+                <option value="claim-adjuster">Claim Adjuster</option>
+                <option value="admin">Admin</option>
+                <option value="policy-holder">Policy Holder</option>
+            </select>
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter username" required />
+            <label>Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Enter password" required />
+            <button type="submit" class="btn btn-login mt-3">Login</button>
+        </form>
+    </div>
+</div>

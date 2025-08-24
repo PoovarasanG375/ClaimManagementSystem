@@ -1,0 +1,507 @@
+﻿/* =======================================
+   Base and Layout Styles (from index.html)
+   ======================================= */
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: white;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar {
+    background-color: #488AFB;
+}
+
+    .navbar .nav-link {
+        color: white !important;
+        font-weight: 500;
+    }
+
+        .navbar .nav-link.active {
+            text-decoration: underline;
+        }
+
+.logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+#main-content {
+    padding-top: 20px;
+    animation: fadeIn 0.4s ease-in-out;
+}
+
+footer {
+    background-color: #f1f1f1;
+    padding: 15px;
+    text-align: center;
+    margin-top: 30px;
+    color: #555;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* =======================================
+   Home Page Styles (from home.html)
+   ======================================= */
+.hero-section {
+    position: relative;
+    height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    text-align: center;
+    background: #488AFB;
+    overflow: hidden;
+}
+
+.hero-background-shapes .shape {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: move-shapes 15s infinite ease-in-out;
+}
+
+    .hero-background-shapes .shape:nth-child(1) {
+        width: 200px;
+        height: 200px;
+        top: -50px;
+        left: -50px;
+    }
+
+    .hero-background-shapes .shape:nth-child(2) {
+        width: 150px;
+        height: 150px;
+        bottom: -30px;
+        right: -30px;
+        animation-delay: 2s;
+    }
+
+    .hero-background-shapes .shape:nth-child(3) {
+        width: 100px;
+        height: 100px;
+        top: 40%;
+        right: 10%;
+        animation-delay: 4s;
+    }
+
+    .hero-background-shapes .shape:nth-child(4) {
+        width: 250px;
+        height: 250px;
+        bottom: 20%;
+        left: 20%;
+        animation-delay: 6s;
+    }
+
+    .hero-background-shapes .shape:nth-child(5) {
+        width: 120px;
+        height: 120px;
+        top: 10%;
+        left: 30%;
+        animation-delay: 8s;
+    }
+
+@keyframes move-shapes {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(50px, -50px) rotate(45deg);
+    }
+
+    50% {
+        transform: translate(0, 0) rotate(90deg);
+    }
+
+    75% {
+        transform: translate(-50px, 50px) rotate(135deg);
+    }
+
+    100% {
+        transform: translate(0, 0) rotate(180deg);
+    }
+}
+
+.hero-content {
+    z-index: 1;
+}
+
+    .hero-content h1 {
+        font-weight: 700;
+        font-size: 3rem;
+        animation: fadeIn 1s ease-out;
+    }
+
+    .hero-content p {
+        font-size: 1.25rem;
+        margin-top: 1rem;
+        animation: fadeIn 1.5s ease-out;
+    }
+
+.section-padding {
+    padding: 80px 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 50px;
+    font-weight: 600;
+    color: #488AFB;
+}
+
+.feature-card {
+    text-align: center;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .feature-card .icon i {
+        font-size: 3rem;
+        color: #488AFB;
+    }
+
+.insurance-type-section {
+    padding: 50px 20px;
+    width: 100vw;
+    flex-shrink: 0;
+}
+
+.policy-tier-card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .policy-tier-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .policy-tier-card h3 {
+        color: #488AFB;
+    }
+
+    .policy-tier-card .price {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #000;
+    }
+
+    .policy-tier-card ul {
+        list-style-type: none;
+        padding: 0;
+        margin: 20px 0;
+    }
+
+        .policy-tier-card ul li::before {
+            content: '✓ ';
+            color: green;
+        }
+
+.testimonial-card {
+    background: #f8f9fa;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.cta-section {
+    background: #488AFB;
+    color: white;
+    text-align: center;
+    padding: 50px 0;
+}
+
+    .cta-section h2 {
+        font-weight: 700;
+    }
+
+/* Animations */
+.animate-on-scroll.is-visible {
+    animation: fadeIn 1s ease-out forwards;
+}
+
+.animate-on-scroll.slide-in-left.is-visible {
+    animation: slideInLeft 1s ease-out forwards;
+}
+
+.animate-on-scroll.zoom-in.is-visible {
+    animation: zoomIn 0.6s ease-out forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes zoomIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* =======================================
+   Login & Signup Styles (from Login.html & SignUp.html)
+   ======================================= */
+.login-container, .signup-wrapper {
+    background-image: url('/Images/1099.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+}
+
+.login-box, .signup-box {
+    width: 100%;
+    max-width: 400px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #3b82f6;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    animation: floating 3s ease-in-out infinite;
+}
+
+    .login-box h4, .signup-box h4 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #3b82f6;
+    }
+
+.form-control {
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+
+.btn-login, .btn-register {
+    background-color: #3b82f6;
+    color: white;
+    width: 100%;
+}
+
+.logo span {
+    display: block;
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #3b82f6;
+    margin-bottom: 1rem;
+}
+
+@keyframes floating {
+    0%, 100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+/* =======================================
+   Contact Page Styles (from contact.html)
+   ======================================= */
+.contact-section {
+    margin-top: 40px;
+    background-color: #f8f9fa;
+    padding: 40px;
+    border-left: 5px solid #488AFB;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    animation: fadeInUp 1s ease-out;
+}
+
+    .contact-section h2 {
+        color: #488AFB;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+.extra-info {
+    margin-top: 30px;
+    background-color: #e6f0ff;
+    padding: 20px;
+    border-radius: 8px;
+    animation: fadeIn 2s ease-out;
+}
+
+@keyframes fadeInUp {
+    0% {
+        transform: translateY(30px);
+        opacity: 0;
+    }
+
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+/* =======================================
+   Benefits Page Styles (from benefits.html)
+   ======================================= */
+:root {
+    --primary-color: #488AFB;
+    --gradient-bg: linear-gradient(to right, #eaf3ff, #ffffff);
+}
+
+.section-title {
+    text-align: center;
+    color: var(--primary-color);
+    font-weight: 700;
+    margin: 50px 0 20px;
+}
+
+.sub-text {
+    text-align: center;
+    color: #444;
+    margin-bottom: 40px;
+}
+
+.benefit-section {
+    background: var(--gradient-bg);
+    padding: 40px 0;
+}
+
+.container-fixed {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.benefit-card {
+    background-color: #fff;
+    border-radius: 15px;
+    padding: 25px;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+    .benefit-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    }
+
+.benefit-icon {
+    font-size: 40px;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    transition: transform 0.3s ease;
+}
+
+.benefit-card:hover .benefit-icon {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.benefit-card h5 {
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.benefit-card p {
+    font-size: 15px;
+    color: #555;
+}
+
+/* Scrollbar styles for policy cards in Accidental Insurance section */
+.row.g-4.flex-nowrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: #488AFB #f8f9fa;
+}
+
+.row.g-4.flex-nowrap::-webkit-scrollbar {
+    height: 8px;
+}
+
+.row.g-4.flex-nowrap::-webkit-scrollbar-thumb {
+    background: #488AFB;
+    border-radius: 4px;
+}
+
+.row.g-4.flex-nowrap::-webkit-scrollbar-track {
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.policy-scroll-wrapper {
+    overflow-x: auto;
+    overflow-y: hidden;
+    height: auto;
+    max-height: none;
+    width: 100%;
+    scrollbar-width: none;
+}
+
+.policy-scroll-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.policy-scroll-row {
+    display: flex;
+    flex-direction: row;
+    min-width: 100%;
+}
+
+/*Nav bar toggler styling*/
+.navbar-toggler {
+    border-color: #fff;
+}
+
+.navbar-toggler-icon {
+    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255,255,255,1)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E");
+}

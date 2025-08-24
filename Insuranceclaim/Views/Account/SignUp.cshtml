@@ -1,0 +1,43 @@
+﻿@{
+    ViewData["Title"] = "Sign Up";
+    ViewBag.Page = "signup";
+}
+
+<div class="signup-wrapper">
+    <div class="signup-box">
+        <div class="logo">
+            <span>The Healthy Mind</span>
+        </div>
+        <h4>Register</h4>
+        <form method="post" asp-controller="Account" asp-action="SignUp">
+            @if (ViewBag.SuccessMessage != null)
+            {
+                <div class="alert alert-success">@ViewBag.SuccessMessage</div>
+            }
+            @if (ViewBag.ErrorMessage != null)
+            {
+                <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+            }
+            <label>User Type</label>
+            <select id="userType" name="userType" class="form-control" required>
+                <option value="">-- Select User Type --</option>
+                <option value="Agent">Agent</option>
+                <option value="Policy Holder">Policy Holder</option>
+            </select>
+
+            <label>Email</label>
+            <input type="email" name="Email" class="form-control" placeholder="Enter Email" required />
+
+            <label>Username</label>
+            <input type="text" name="username" class="form-control" placeholder="Enter username" required />
+
+            <label>Create Password</label>
+            <input type="password" name="password" class="form-control" placeholder="Create password" required />
+
+            <label>Re-enter Password</label>
+            <input type="password" name="confirmPassword" class="form-control" placeholder="Re-enter password" required />
+
+            <button type="submit" class="btn btn-register mt-3">Register</button>
+        </form>
+    </div>
+</div>
