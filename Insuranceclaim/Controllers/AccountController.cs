@@ -35,7 +35,7 @@ namespace Insuranceclaim.Controllers
                         return RedirectToAction("AgentHome", "AgentDashboard");
                     case "claim-adjuster":
                         return RedirectToAction("ClaimAdjusterHome", "ClaimAdjusterDashboard");
-                    case "policy-holder":
+                    case "policy holder":
                         return RedirectToAction("PolicyHolderHome", "PolicyHolderDashboard");
                     default:
                         ViewBag.ErrorMessage = "Invalid user type.";
