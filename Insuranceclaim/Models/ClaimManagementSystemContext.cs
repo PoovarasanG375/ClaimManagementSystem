@@ -15,6 +15,8 @@ public partial class ClaimManagementSystemContext : DbContext
     {
     }
 
+    public virtual DbSet<AppliedPolicy> AppliedPolicies { get; set; }
+
     public virtual DbSet<Claim> Claims { get; set; }
 
     public virtual DbSet<Document> Documents { get; set; }
@@ -31,6 +33,26 @@ public partial class ClaimManagementSystemContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AppliedPolicy>(entity =>
+        {
+            entity.HasKey(e => e.ApplyId).HasName("PK__AppliedP__F0687FB140240E97");
+
+            entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
+            entity.Property(e => e.EnrollementStatus)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.PolicyId).HasColumnName("policyId");
+            entity.Property(e => e.UserId).HasColumnName("userId");
+
+            entity.HasOne(d => d.Policy).WithMany(p => p.AppliedPolicies)
+                .HasForeignKey(d => d.PolicyId)
+                .HasConstraintName("FK__AppliedPo__polic__5FB337D6");
+
+            entity.HasOne(d => d.User).WithMany(p => p.AppliedPolicies)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__AppliedPo__userI__5EBF139D");
+        });
+
         modelBuilder.Entity<Claim>(entity =>
         {
             entity.HasKey(e => e.ClaimId).HasName("PK__Claim__01BDF9D305441C17");
@@ -48,14 +70,19 @@ public partial class ClaimManagementSystemContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("claimStatus");
             entity.Property(e => e.PolicyId).HasColumnName("policyId");
+            entity.Property(e => e.UserId).HasColumnName("userId");
 
-            entity.HasOne(d => d.Adjuster).WithMany(p => p.Claims)
+            entity.HasOne(d => d.Adjuster).WithMany(p => p.ClaimAdjusters)
                 .HasForeignKey(d => d.AdjusterId)
                 .HasConstraintName("FK__Claim__adjusterI__45F365D3");
 
             entity.HasOne(d => d.Policy).WithMany(p => p.Claims)
                 .HasForeignKey(d => d.PolicyId)
                 .HasConstraintName("FK__Claim__policyId__44FF419A");
+
+            entity.HasOne(d => d.User).WithMany(p => p.ClaimUsers)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("FK__Claim__userId__60A75C0F");
         });
 
         modelBuilder.Entity<Document>(entity =>
@@ -95,6 +122,7 @@ public partial class ClaimManagementSystemContext : DbContext
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("coverageAmount");
             entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
+            entity.Property(e => e.Description).HasMaxLength(255);
             entity.Property(e => e.PolicyName)
                 .HasMaxLength(100)
                 .IsUnicode(false)

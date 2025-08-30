@@ -17,9 +17,13 @@ public partial class Claim
 
     public int? AdjusterId { get; set; }
 
+    public int? UserId { get; set; }
+
     public virtual User? Adjuster { get; set; }
 
     public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
 
     public virtual Policy? Policy { get; set; }
+
+    public virtual User? User { get; set; }
 }

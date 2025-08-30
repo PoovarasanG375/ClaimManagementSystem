@@ -1,0 +1,195 @@
+﻿html,
+body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: #f8f9fa;
+}
+
+.header {
+    background-color: #ffffff;
+    border-bottom: 1px solid #e0e0e0;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+    .header .logo-section {
+        display: flex;
+        align-items: center;
+    }
+
+        .header .logo-section .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #007bff;
+            margin-right: 10px;
+        }
+
+    .header .user-info {
+        font-size: 1.1rem;
+        color: #333;
+    }
+
+    .header .logout-btn {
+        background: none;
+        border: none;
+        color: #007bff;
+        font-weight: 500;
+        margin-left: 20px;
+        text-decoration: none;
+    }
+
+        .header .logout-btn:hover {
+            text-decoration: underline;
+        }
+
+.page-container {
+    display: flex;
+    flex-grow: 1;
+    overflow: hidden;
+}
+
+.sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    background-color: #ffffff;
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+}
+
+    .sidebar .nav-link {
+        color: #333;
+        padding: 12px 20px;
+        font-size: 1.05rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        border-radius: 6px;
+        margin-bottom: 5px;
+    }
+
+        .sidebar .nav-link.active {
+            color: #0d6efd;
+            background-color: #e0f0ff;
+        }
+
+.dashboard-content {
+    flex-grow: 1;
+    padding: 30px;
+    overflow-y: auto;
+}
+
+.card-policy {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+}
+
+    .card-policy .policy-title {
+        font-size: 1.4rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #333;
+    }
+
+    .card-policy .policy-tag {
+        display: inline-block;
+        background-color: #e2f0ff;
+        color: #007bff;
+        padding: 5px 10px;
+        border-radius: 5px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+    }
+
+    .card-policy .details span {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        color: #555;
+    }
+
+    .card-policy .details strong {
+        color: #333;
+    }
+
+    .card-policy .currency {
+        font-weight: bold;
+        font-size: 1.1rem;
+        color: #333;
+    }
+
+    .card-policy .description {
+        font-size: 0.9rem;
+        color: #666;
+        margin-top: 15px;
+        line-height: 1.5;
+    }
+
+    .card-policy .btn-enroll {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        background-color: #1a202c;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+    }
+
+        .card-policy .btn-enroll:hover {
+            background-color: #343a40;
+        }
+
+    .card-policy .btn-already-enrolled {
+        width: 100%;
+        padding: 12px;
+        margin-top: 20px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        background-color: #6c757d;
+        color: #ffffff;
+        border: none;
+        border-radius: 6px;
+        cursor: not-allowed;
+    }
+
+h2 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+p.lead-text {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+h3 {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #333;
+    margin-top: 30px;
+    margin-bottom: 20px;
+}
+
+footer {
+    background-color: #f1f1f1;
+    padding: 15px;
+    text-align: center;
+    margin-top: 30px;
+    color: #555;
+}

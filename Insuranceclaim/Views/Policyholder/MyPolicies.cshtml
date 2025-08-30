@@ -1,0 +1,91 @@
+﻿@model List<Insuranceclaim.Models.Policy>
+@{
+    Layout = "~/Views/Shared/_PolicyholderLayout.cshtml";
+    ViewData["Title"] = "My Policies";
+    ViewBag.Page = "MyPolicies";
+}
+
+<div class="container-fluid">
+    <h2>My Policies</h2>
+    <p class="lead-text">Manage your enrolled insurance policies</p>
+
+    <div id="my-policies-container" class="row">
+        @if (!Model.Any())
+        {
+            <div class="col-12"><p class="text-muted">You have no policies enrolled yet.</p></div>
+        }
+        else
+        {
+            foreach (var policy in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card-policy">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div class="policy-title">@policy.PolicyName</div>
+                            <span class="badge bg-primary px-3 py-2 rounded-pill" style="font-size: 0.85rem;">active</span>
+                        </div>
+                        <div class="details mt-3">
+                            <span>Policy ID <span class="float-end text-muted">@policy.PolicyId</span></span><br>
+                            <span>Coverage <span class="float-end currency">@policy.CoverageAmount</span></span><br>
+                            <span>Premium <span class="float-end currency">@policy.AnnualPremium</span></span><br>
+                            <span>Enrolled <span class="float-end text-muted">@policy.CreatedDate.HasValue ? policy.EnrolledDate.Value.ToString("dd/MM/yyyy") : "N/A"</span></span>
+                        </div>
+                        <button class="btn btn-enroll mt-4" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
+                            <i class="fas fa-plus me-2"></i> Submit Claim
+                        </button>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="claimForm" asp-controller="Policyholder" asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="modal-content">
+            <input type="hidden" id="claim-policy-id" name="policyId">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Submit Claim</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="claimAmount" class="form-label">Claim Amount (₹)</label>
+                    <input type="number" class="form-control" id="claimAmount" name="claimAmount" placeholder="e.g., 50000" required>
+                </div>
+                <div class="mb-3">
+                    <label for="incidentDate" class="form-label">Date of Incident</label>
+                    <input type="date" class="form-control" id="incidentDate" name="incidentDate" required>
+                </div>
+                <div class="mb-3">
+                    <label for="incidentDescription" class="form-label">Description of Incident</label>
+                    <textarea class="form-control" id="incidentDescription" name="incidentDescription" rows="3" placeholder="Describe what happened..." required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="claimFile" class="form-label">Upload Supporting Document</label>
+                    <input type="file" class="form-control" id="claimFile" name="claimFile" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Claim</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Handle claim submission modal dynamic content
+        $('#uploadModal').on('show.bs.modal', function (e) {
+            const button = $(e.relatedTarget);
+            const policyId = button.data('policy-id');
+            const policyTitle = button.data('policy-title');
+
+            const modalTitle = $(this).find('.modal-title');
+            modalTitle.text(`Submit Claim for ${policyTitle} (${policyId})`);
+
+            $('#claim-policy-id').val(policyId);
+        });
+    </script>
+}

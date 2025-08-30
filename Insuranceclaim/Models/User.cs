@@ -15,7 +15,11 @@ public partial class User
 
     public string? Email { get; set; }
 
-    public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
+    public virtual ICollection<AppliedPolicy> AppliedPolicies { get; set; } = new List<AppliedPolicy>();
+
+    public virtual ICollection<Claim> ClaimAdjusters { get; set; } = new List<Claim>();
+
+    public virtual ICollection<Claim> ClaimUsers { get; set; } = new List<Claim>();
 
     public virtual ICollection<Policy> Policies { get; set; } = new List<Policy>();
 

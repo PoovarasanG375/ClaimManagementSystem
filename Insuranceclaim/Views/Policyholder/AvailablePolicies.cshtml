@@ -1,0 +1,124 @@
+﻿@model List<Insuranceclaim.Models.Policy>
+@{
+    Layout = "~/Views/Shared/_PolicyholderLayout.cshtml";
+    ViewData["Title"] = "Available Policies";
+    ViewBag.Page = "AvailablePolicies";
+}
+
+<div class="container-fluid">
+    <h2>Available Policies</h2>
+    <p class="lead-text">Choose from our comprehensive insurance policies</p>
+
+    <div id="policy-cards-container">
+        @{
+            var categorizedPolicies = new Dictionary<string, List<Insuranceclaim.Models.Policy>>();
+            var accidentalPolicies = new List<Insuranceclaim.Models.Policy>();
+            var seniorCarePolicies = new List<Insuranceclaim.Models.Policy>();
+            var lifeInsurancePolicies = new List<Insuranceclaim.Models.Policy>();
+            var otherPolicies = new List<Insuranceclaim.Models.Policy>();
+
+            foreach (var policy in Model)
+            {
+                if (policy.PolicyName.Contains("Accidental", StringComparison.OrdinalIgnoreCase))
+                {
+                    accidentalPolicies.Add(policy);
+                }
+                else if (policy.PolicyName.Contains("Senior", StringComparison.OrdinalIgnoreCase))
+                {
+                    seniorCarePolicies.Add(policy);
+                }
+                else if (policy.PolicyName.Contains("Life", StringComparison.OrdinalIgnoreCase))
+                {
+                    lifeInsurancePolicies.Add(policy);
+                }
+                else
+                {
+                    otherPolicies.Add(policy);
+                }
+            }
+
+            if (accidentalPolicies.Any())
+                categorizedPolicies.Add("Accidental Policy", accidentalPolicies);
+            if (seniorCarePolicies.Any())
+                categorizedPolicies.Add("Senior Care Policy", seniorCarePolicies);
+            if (lifeInsurancePolicies.Any())
+                categorizedPolicies.Add("Life Insurance Policy", lifeInsurancePolicies);
+            if (otherPolicies.Any())
+                categorizedPolicies.Add("Other Policies", otherPolicies);
+        }
+
+        @foreach (var category in categorizedPolicies)
+        {
+            <div class="policy-category">
+                <h3 class="mt-4">@category.Key</h3>
+                <div class="row">
+                    @foreach (var policy in category.Value)
+                    {
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card-policy">
+                                <div class="policy-title">@policy.PolicyName</div>
+                                <span class="policy-tag">@policy.PolicyName.Split(' ')[0]</span>
+                                <div class="details mt-3">
+                                    <span>Coverage <span class="float-end currency">@policy.CoverageAmount?.ToString("C0")</span></span>
+                                    <span>Annual Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span>
+                                </div>
+                                <div class="description mt-3">
+                                    @policy.Description;
+                                </div>
+                                @if (policy.PolicyStatus == "Enrolled" || policy.PolicyStatus == "Active")
+                                {
+                                    <button class="btn btn-already-enrolled">Already Enrolled</button>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-controller="Policyholder" asp-action="EnrollPolicy" style="display:inline">
+                                        <input type="hidden" name="policyId" value="@policy.PolicyId" />
+                                        <button type="submit" class="btn btn-enroll">Enroll Now</button>
+                                    </form>
+                                }
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    @* The modal for enrollment confirmation goes here *@
+    <div class="modal fade" id="enrollmentConfirmModal" tabindex="-1" aria-labelledby="enrollmentConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="enrollmentConfirmModalLabel">Confirm Enrollment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to enroll in the <strong id="policy-name-to-enroll"></strong> policy?</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirm-enroll-btn">Confirm Enrollment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Handle opening the modal
+            $('#policy-cards-container').on('click', '.btn-enroll', function() {
+                const policyTitle = $(this).data('policy-title');
+                $('#policy-name-to-enroll').text(policyTitle);
+                $('#confirm-enroll-btn').data('policy-id', $(this).data('policy-id'));
+            });
+
+            // Handle enrollment confirmation
+            $('#confirm-enroll-btn').on('click', function() {
+                const policyId = $(this).data('policy-id');
+                window.location.href = `/Policyholder/EnrollPolicy?policyId=${policyId}`;
+            });
+        });
+    </script>
+    }

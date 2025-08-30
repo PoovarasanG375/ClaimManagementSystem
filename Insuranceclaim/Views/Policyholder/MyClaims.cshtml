@@ -1,0 +1,64 @@
+﻿@model List<Insuranceclaim.Models.Claim>
+@{
+    Layout = "~/Views/Shared/_PolicyholderLayout.cshtml";
+    ViewData["Title"] = "My Claims";
+    ViewBag.Page = "MyClaims";
+}
+
+<div class="container-fluid">
+    <h2>My Claims</h2>
+    <p class="lead-text">Track the status of your submitted claims</p>
+
+    <div id="my-claims-container">
+        @if (!Model.Any())
+        {
+            <div class="card-policy p-4"><p class="text-muted mb-0">You have not submitted any claims yet.</p></div>
+        }
+        else
+        {
+            <div class="card-policy p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Claim ID</th>
+                                <th scope="col">Policy</th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">Incident Date</th>
+                                <th scope="col">Submitted On</th>
+                                <th scope="col">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var claim in Model)
+                            {
+                                string statusBadgeClass = "";
+                                if (claim.ClaimStatus == "New")
+                                {
+                                    statusBadgeClass = "bg-primary-subtle text-primary-emphasis";
+                                }
+                                else if (claim.ClaimStatus == "In Progress")
+                                {
+                                    statusBadgeClass = "bg-warning-subtle text-warning-emphasis";
+                                }
+                                else if (claim.ClaimStatus == "Resolved")
+                                {
+                                    statusBadgeClass = "bg-success-subtle text-success-emphasis";
+                                }
+
+                                <tr>
+                                    <th scope="row">@claim.ClaimId</th>
+                                    <td>@claim.PolicyId</td>
+                                    <td>@claim.ClaimAmount</td>
+                                    <td>@claim.ClaimDate.HasValue ? claim.IncidentDate.Value.ToString("yyyy-MM-dd") : "N/A"</td>
+                                    @* <td>@claim.SubmissionDate.HasValue ? claim.SubmissionDate.Value.ToString("yyyy-MM-dd") : "N/A"</td> *@
+                                    <td><span class="badge @statusBadgeClass rounded-pill">@claim.ClaimStatus</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>

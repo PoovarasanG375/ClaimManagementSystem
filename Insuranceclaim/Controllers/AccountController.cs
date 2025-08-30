@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Insuranceclaim.Models;
+﻿using Insuranceclaim.Models;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using System.Security.Claims;
+
+using Claim = System.Security.Claims.Claim;
 
 namespace Insuranceclaim.Controllers
 {
@@ -16,16 +21,33 @@ namespace Insuranceclaim.Controllers
         [HttpGet]
         public IActionResult Login()
         {
-            // This method serves the login page
             return View();
         }
 
         [HttpPost]
-        public IActionResult Login(string usertype, string username, string password)
+        public async Task<IActionResult> Login(string usertype, string username, string password)
         {
             var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password && u.Role == usertype);
             if (user != null)
             {
+                // Create a list of claims for the authenticated user
+                var claims = new List<Claim>
+                {
+                    // Add the user's ID as a claim
+                    new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                    // Add the user's name as a claim
+                    new Claim(ClaimTypes.Name, user.Username),
+                    // Add the user's role as a claim, which allows User.IsInRole() to work
+                    new Claim(ClaimTypes.Role, user.Role)
+                };
+
+                // Create a claims identity and principal
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var claimsPrincipal = new ClaimsPrincipal(claimsIdentity);
+
+                // Sign the user in. This creates the authentication cookie.
+                await HttpContext.SignInAsync(claimsPrincipal);
+
                 // Redirect based on user type
                 switch (usertype.ToLower())
                 {
@@ -36,7 +58,7 @@ namespace Insuranceclaim.Controllers
                     case "claim-adjuster":
                         return RedirectToAction("ClaimAdjusterHome", "ClaimAdjusterDashboard");
                     case "policy holder":
-                        return RedirectToAction("PolicyHolderHome", "PolicyHolderDashboard");
+                        return RedirectToAction("Dashboard", "Policyholder");
                     default:
                         ViewBag.ErrorMessage = "Invalid user type.";
                         return View();
@@ -87,6 +109,88 @@ namespace Insuranceclaim.Controllers
             _context.SaveChanges();
             ViewBag.SuccessMessage = "Registration successful! Please log in.";
             return View();
+            //private readonly ClaimManagementSystemContext _context;
+
+            //public AccountController(ClaimManagementSystemContext context)
+            //{
+            //    _context = context;
+            //}
+
+            //[HttpGet]
+            //public IActionResult Login()
+            //{
+            //    // This method serves the login page
+            //    return View();
+            //}
+
+            //[HttpPost]
+            //public IActionResult Login(string usertype, string username, string password)
+            //{
+            //    var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password && u.Role == usertype);
+            //    if (user != null)
+            //    {
+            //        // Redirect based on user type
+            //        switch (usertype.ToLower())
+            //        {
+            //            case "admin":
+            //                return RedirectToAction("AdminHome", "AdminDashboard");
+            //            case "agent":
+            //                return RedirectToAction("AgentHome", "AgentDashboard");
+            //            case "claim-adjuster":
+            //                return RedirectToAction("ClaimAdjusterHome", "ClaimAdjusterDashboard");
+            //            case "policy holder":
+            //                return RedirectToAction("PolicyHolderHome", "PolicyHolderDashboard");
+            //            default:
+            //                ViewBag.ErrorMessage = "Invalid user type.";
+            //                return View();
+            //        }
+            //    }
+            //    else
+            //    {
+            //        ViewBag.ErrorMessage = "Invalid username, password, or user type.";
+            //        return View();
+            //    }
+            //}
+
+            //[HttpGet]
+            //public IActionResult SignUp()
+            //{
+            //    return View();
+            //}
+
+            //[HttpPost]
+            //public IActionResult SignUp(string userType, string username, string password, string confirmPassword, string Email)
+            //{
+            //    if (password != confirmPassword)
+            //    {
+            //        ViewBag.ErrorMessage = "Passwords do not match.";
+            //        return View();
+            //    }
+
+            //    if (_context.Users.Any(u => u.Email == Email))
+            //    {
+            //        ViewBag.ErrorMessage = "Email already exists.";
+            //        return View();
+            //    }
+
+            //    if (_context.Users.Any(u => u.Username == username))
+            //    {
+            //        ViewBag.ErrorMessage = "Username already exists.";
+            //        return View();
+            //    }
+
+            //    var user = new User
+            //    {
+            //        Username = username,
+            //        Password = password,
+            //        Role = userType,
+            //        Email = Email
+            //    };
+            //    _context.Users.Add(user);
+            //    _context.SaveChanges();
+            //    ViewBag.SuccessMessage = "Registration successful! Please log in.";
+            //    return View();
+            //}
         }
     }
 }
