@@ -27,13 +27,13 @@ public partial class ClaimManagementSystemContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=LTIN650319\\SQLEXPRESS;Database=ClaimManagementSystem;Trusted_Connection=true;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=LTIN650005\\SQLEXPRESS;Database=ClaimManagementSystem;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Claim>(entity =>
         {
-            entity.HasKey(e => e.ClaimId).HasName("PK__Claim__01BDF9D305441C17");
+            entity.HasKey(e => e.ClaimId).HasName("PK__Claim__01BDF9D32901F406");
 
             entity.ToTable("Claim");
 
@@ -51,16 +51,16 @@ public partial class ClaimManagementSystemContext : DbContext
 
             entity.HasOne(d => d.Adjuster).WithMany(p => p.Claims)
                 .HasForeignKey(d => d.AdjusterId)
-                .HasConstraintName("FK__Claim__adjusterI__45F365D3");
+                .HasConstraintName("FK__Claim__adjusterI__403A8C7D");
 
             entity.HasOne(d => d.Policy).WithMany(p => p.Claims)
                 .HasForeignKey(d => d.PolicyId)
-                .HasConstraintName("FK__Claim__policyId__44FF419A");
+                .HasConstraintName("FK__Claim__policyId__3F466844");
         });
 
         modelBuilder.Entity<Document>(entity =>
         {
-            entity.HasKey(e => e.DocumentId).HasName("PK__Document__EFAAAD85F564A1AE");
+            entity.HasKey(e => e.DocumentId).HasName("PK__Document__EFAAAD858E559587");
 
             entity.ToTable("Document");
 
@@ -81,20 +81,28 @@ public partial class ClaimManagementSystemContext : DbContext
 
             entity.HasOne(d => d.Claim).WithMany(p => p.Documents)
                 .HasForeignKey(d => d.ClaimId)
-                .HasConstraintName("FK__Document__claimI__48CFD27E");
+                .HasConstraintName("FK__Document__claimI__4316F928");
         });
 
         modelBuilder.Entity<Policy>(entity =>
         {
-            entity.HasKey(e => e.PolicyId).HasName("PK__Policy__78E3A9229705EC33");
+            entity.HasKey(e => e.PolicyId).HasName("PK__Policy__78E3A92257E1B755");
 
             entity.ToTable("Policy");
 
             entity.Property(e => e.PolicyId).HasColumnName("policyId");
+            entity.Property(e => e.Category)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("category");
             entity.Property(e => e.CoverageAmount)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("coverageAmount");
             entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
+            entity.Property(e => e.Description)
+                .HasMaxLength(255)
+                .IsUnicode(false)
+                .HasColumnName("description");
             entity.Property(e => e.PolicyName)
                 .HasMaxLength(100)
                 .IsUnicode(false)
@@ -108,15 +116,18 @@ public partial class ClaimManagementSystemContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("policyStatus");
             entity.Property(e => e.PolicyholderId).HasColumnName("policyholderId");
+            entity.Property(e => e.Premium)
+                .HasColumnType("decimal(10, 2)")
+                .HasColumnName("premium");
 
             entity.HasOne(d => d.Policyholder).WithMany(p => p.Policies)
                 .HasForeignKey(d => d.PolicyholderId)
-                .HasConstraintName("FK__Policy__policyho__4222D4EF");
+                .HasConstraintName("FK__Policy__policyho__3C69FB99");
         });
 
         modelBuilder.Entity<SupportTicket>(entity =>
         {
-            entity.HasKey(e => e.TicketId).HasName("PK__SupportT__3333C6100A72A2E3");
+            entity.HasKey(e => e.TicketId).HasName("PK__SupportT__3333C6106C991819");
 
             entity.ToTable("SupportTicket");
 
@@ -125,24 +136,28 @@ public partial class ClaimManagementSystemContext : DbContext
             entity.Property(e => e.IssueDescription)
                 .HasColumnType("text")
                 .HasColumnName("issueDescription");
+            entity.Property(e => e.Response).IsUnicode(false);
             entity.Property(e => e.TicketStatus)
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("ticketStatus");
             entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.Username)
+                .HasMaxLength(255)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.User).WithMany(p => p.SupportTickets)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__SupportTi__userI__4BAC3F29");
+                .HasConstraintName("FK__SupportTi__userI__45F365D3");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CFF8AE9D2B4");
+            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CFFFE3E4054");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Username, "UQ__User__F3DBC57257FFADC1").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__User__F3DBC5727857ABCB").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.Email)

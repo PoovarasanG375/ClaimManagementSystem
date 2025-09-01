@@ -1,0 +1,47 @@
+﻿/* General body and container styling */
+body {
+    background-color: #f8f9fa;
+}
+
+/* Navbar and header styling */
+.navbar-brand {
+    font-weight: bold;
+}
+
+/* Main content and title styling */
+#mainContent {
+    padding: 20px;
+}
+
+.claim-header {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.claim-subtitle {
+    color: #6c757d;
+}
+
+/* Claim card styling */
+.claim-card {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    border-radius: 8px;
+}
+
+/* Button styling */
+.view-btn {
+    font-size: 0.9rem;
+}
+
+/* Modal header styling */
+.modal-header {
+    background-color: #007bff;
+    color: white;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+}
+
+    .modal-header .btn-close {
+        color: white;
+    }

@@ -15,5 +15,9 @@ public partial class SupportTicket
 
     public DateOnly? CreatedDate { get; set; }
 
+    public string? Response { get; set; }
+
+    public string? Username { get; set; }
+
     public virtual User? User { get; set; }
 }

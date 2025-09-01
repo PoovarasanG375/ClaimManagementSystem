@@ -1,0 +1,143 @@
+﻿@model IEnumerable<Insuranceclaim.Models.User>
+@{
+    ViewData["Title"] = "User Management - Admin Dashboard";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://www.google.com/search?q=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<div class="container-fluid mt-4">
+    <h3 class="mb-3">User Management</h3>
+    <p>Manage agents and claim adjusters.</p>
+
+    <!-- Stat Cards -->
+    <div class="row text-center mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Total Agents</h5>
+                    <p class="card-text fs-4">
+                        @Model.Count(u => u.Role == "Agent")
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-warning">
+                <div class="card-body">
+                    <h5 class="card-title">Claim Adjusters</h5>
+                    <p class="card-text fs-4">
+                        @Model.Count(u => u.Role == "Claim Adjuster")
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Total Users</h5>
+                    <p class="card-text fs-4">
+                        @Model.Count()
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Create Button -->
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-4">
+            <form method="get" asp-action="Index">
+                <select class="form-select" name="roleFilter" onchange="this.form.submit()">
+                    <option value="" selected="@(string.IsNullOrEmpty(ViewBag.roleFilter))">All Roles</option>
+                    <option value="Agent" selected="@(ViewBag.roleFilter == "Agent")">Agent</option>
+                    <option value="Claim Adjuster" selected="@(ViewBag.roleFilter == "Claim Adjuster")">Claim Adjuster</option>
+                    <option value="ADMIN" selected="@(ViewBag.roleFilter == "ADMIN")">ADMIN</option>
+                    <option value="POLICY HOLDER" selected="@(ViewBag.roleFilter == "POLICY HOLDER")">POLICY HOLDER</option>
+                </select>
+            </form>
+        </div>
+        <div class="col-md-8 text-end">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createUserModal">
+                <i class="fas fa-plus-circle"></i> Create User
+            </button>
+        </div>
+    </div>
+
+    <!-- User List Table -->
+    <div class="card">
+        <div class="card-header bg-secondary text-white">User List</div>
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>User ID</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var user in Model)
+                    {
+                        <tr>
+                            <td>@user.Username</td>
+                            <td>@user.Email</td>
+                            <td>@user.Role</td>
+                            <td>@user.UserId</td>
+                            <td>
+                                <a class="btn btn-sm btn-primary" href="/AdminUsers/Edit/@user.UserId">Edit</a>
+                                <a class="btn btn-sm btn-danger" href="/AdminUsers/Delete/@user.UserId">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<!-- Create User Modal -->
+
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createUserModalLabel">Create New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="Password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Role</label>
+                        <select class="form-select" id="role" name="Role" required>
+                            <option value="Agent">Agent</option>
+                            <option value="Claim Adjuster">Claim Adjuster</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://www.google.com/search?q=https://cdn.jsdelivr.net/npm/bootstrap%405.3.7/dist/js/bootstrap.bundle.min.js"></script>

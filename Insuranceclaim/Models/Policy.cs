@@ -7,6 +7,8 @@ public partial class Policy
 {
     public int PolicyId { get; set; }
 
+    public string? PolicyName { get; set; }
+
     public string? PolicyNumber { get; set; }
 
     public int? PolicyholderId { get; set; }
@@ -17,7 +19,11 @@ public partial class Policy
 
     public DateOnly? CreatedDate { get; set; }
 
-    public string? PolicyName { get; set; }
+    public string? Category { get; set; }
+
+    public decimal? Premium { get; set; }
+
+    public string? Description { get; set; }
 
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
 
