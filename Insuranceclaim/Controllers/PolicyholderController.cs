@@ -82,6 +82,15 @@ namespace Insuranceclaim.Controllers
                       })
                 .ToList();
 
+            // Remove policies for which a claim has already been submitted
+            var claimedPolicyIds = _context.Claims.Where(c => c.UserId == userId).Select(c => c.PolicyId).ToList();
+            enrolledPolicies = enrolledPolicies.Where(p => !claimedPolicyIds.Contains(p.PolicyId)).ToList();
+
+            if (TempData["ErrorMessage"] != null)
+                ViewBag.ErrorMessage = TempData["ErrorMessage"];
+            if (TempData["SuccessMessage"] != null)
+                ViewBag.SuccessMessage = TempData["SuccessMessage"];
+
             return View(enrolledPolicies);
         }
 
@@ -89,6 +98,13 @@ namespace Insuranceclaim.Controllers
         public IActionResult Support()
         {
             return View();
+        }
+
+        [HttpGet]
+        public IActionResult MyClaims()
+        {
+            // This method is now handled in ClaimController
+            return RedirectToAction("MyClaims", "Claim");
         }
 
         [HttpPost]

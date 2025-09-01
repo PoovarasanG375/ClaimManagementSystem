@@ -9,6 +9,11 @@
     <h2>My Claims</h2>
     <p class="lead-text">Track the status of your submitted claims</p>
 
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
     <div id="my-claims-container">
         @if (!Model.Any())
         {
@@ -25,7 +30,6 @@
                                 <th scope="col">Policy</th>
                                 <th scope="col">Amount</th>
                                 <th scope="col">Incident Date</th>
-                                <th scope="col">Submitted On</th>
                                 <th scope="col">Status</th>
                             </tr>
                         </thead>
@@ -33,11 +37,11 @@
                             @foreach (var claim in Model)
                             {
                                 string statusBadgeClass = "";
-                                if (claim.ClaimStatus == "New")
+                                if (claim.ClaimStatus == "Pending")
                                 {
                                     statusBadgeClass = "bg-primary-subtle text-primary-emphasis";
                                 }
-                                else if (claim.ClaimStatus == "In Progress")
+                                else if (claim.ClaimStatus == "Rejected")
                                 {
                                     statusBadgeClass = "bg-warning-subtle text-warning-emphasis";
                                 }
@@ -48,10 +52,9 @@
 
                                 <tr>
                                     <th scope="row">@claim.ClaimId</th>
-                                    <td>@claim.PolicyId</td>
+                                    <td>@claim.Policy?.PolicyName</td>
                                     <td>@claim.ClaimAmount</td>
-                                    <td>@claim.ClaimDate.HasValue ? claim.IncidentDate.Value.ToString("yyyy-MM-dd") : "N/A"</td>
-                                    @* <td>@claim.SubmissionDate.HasValue ? claim.SubmissionDate.Value.ToString("yyyy-MM-dd") : "N/A"</td> *@
+                                    <td>@claim.ClaimDate?.ToString("yyyy-MM-dd")</td>
                                     <td><span class="badge @statusBadgeClass rounded-pill">@claim.ClaimStatus</span></td>
                                 </tr>
                             }

@@ -9,6 +9,15 @@
     <h2>My Policies</h2>
     <p class="lead-text">Manage your enrolled insurance policies</p>
 
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <div class="alert alert-warning">@ViewBag.ErrorMessage</div>
+    }
+    @if (ViewBag.SuccessMessage != null)
+    {
+        <div class="alert alert-success">@ViewBag.SuccessMessage</div>
+    }
+
     <div id="my-policies-container" class="row">
         @if (!Model.Any())
         {
@@ -42,7 +51,7 @@
 
 <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="claimForm" asp-controller="Policyholder" asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="modal-content">
+        <form id="claimForm" asp-controller="Claim" asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="modal-content">
             <input type="hidden" id="claim-policy-id" name="policyId">
             <div class="modal-header">
                 <h5 class="modal-title" id="uploadModalLabel">Submit Claim</h5>
