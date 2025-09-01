@@ -22,13 +22,13 @@
                     <div class="card-policy">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="policy-title">@policy.PolicyName</div>
-                            <span class="badge bg-primary px-3 py-2 rounded-pill" style="font-size: 0.85rem;">active</span>
+                            <span class="badge bg-primary px-3 py-2 rounded-pill" style="font-size: 0.85rem;">@policy.PolicyStatus</span>
                         </div>
                         <div class="details mt-3">
-                            <span>Policy ID <span class="float-end text-muted">@policy.PolicyId</span></span><br>
+                            <span>Policy Number <span class="float-end text-muted">@policy.PolicyNumber</span></span><br>
                             <span>Coverage <span class="float-end currency">@policy.CoverageAmount</span></span><br>
                             <span>Premium <span class="float-end currency">@policy.AnnualPremium</span></span><br>
-                            <span>Enrolled <span class="float-end text-muted">@policy.CreatedDate.HasValue ? policy.EnrolledDate.Value.ToString("dd/MM/yyyy") : "N/A"</span></span>
+                            <span>Enrolled <span class="float-end text-muted">@policy.CreatedDate</span></span>
                         </div>
                         <button class="btn btn-enroll mt-4" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
                             <i class="fas fa-plus me-2"></i> Submit Claim

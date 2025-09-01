@@ -19,6 +19,8 @@ public partial class Claim
 
     public int? UserId { get; set; }
 
+    public string? DescriptionofIncident { get; set; }
+
     public virtual User? Adjuster { get; set; }
 
     public virtual ICollection<Document> Documents { get; set; } = new List<Document>();

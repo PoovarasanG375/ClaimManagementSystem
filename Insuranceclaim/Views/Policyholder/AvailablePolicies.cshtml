@@ -57,13 +57,13 @@
                         <div class="col-md-6 col-lg-4 mb-4">
                             <div class="card-policy">
                                 <div class="policy-title">@policy.PolicyName</div>
-                                <span class="policy-tag">@policy.PolicyName.Split(' ')[0]</span>
+                                <span class="policy-tag">@policy.PolicyName?.Split(' ')[0]</span>
                                 <div class="details mt-3">
                                     <span>Coverage <span class="float-end currency">@policy.CoverageAmount?.ToString("C0")</span></span>
                                     <span>Annual Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span>
                                 </div>
                                 <div class="description mt-3">
-                                    @policy.Description;
+                                    @policy.Description
                                 </div>
                                 @if (policy.PolicyStatus == "Enrolled" || policy.PolicyStatus == "Active")
                                 {
@@ -71,10 +71,7 @@
                                 }
                                 else
                                 {
-                                    <form method="post" asp-controller="Policyholder" asp-action="EnrollPolicy" style="display:inline">
-                                        <input type="hidden" name="policyId" value="@policy.PolicyId" />
-                                        <button type="submit" class="btn btn-enroll">Enroll Now</button>
-                                    </form>
+                                    <button type="button" class="btn btn-enroll" data-bs-toggle="modal" data-bs-target="#enrollmentConfirmModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">Enroll Now</button>
                                 }
                             </div>
                         </div>
@@ -96,8 +93,11 @@
                     <p>Are you sure you want to enroll in the <strong id="policy-name-to-enroll"></strong> policy?</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirm-enroll-btn">Confirm Enrollment</button>
+                    <form id="enrollForm" method="post" asp-controller="Policyholder" asp-action="EnrollPolicy">
+                        <input type="hidden" id="modal-policy-id" name="policyId" />
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Confirm Enrollment</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -110,14 +110,9 @@
             // Handle opening the modal
             $('#policy-cards-container').on('click', '.btn-enroll', function() {
                 const policyTitle = $(this).data('policy-title');
-                $('#policy-name-to-enroll').text(policyTitle);
-                $('#confirm-enroll-btn').data('policy-id', $(this).data('policy-id'));
-            });
-
-            // Handle enrollment confirmation
-            $('#confirm-enroll-btn').on('click', function() {
                 const policyId = $(this).data('policy-id');
-                window.location.href = `/Policyholder/EnrollPolicy?policyId=${policyId}`;
+                $('#policy-name-to-enroll').text(policyTitle);
+                $('#modal-policy-id').val(policyId);
             });
         });
     </script>
