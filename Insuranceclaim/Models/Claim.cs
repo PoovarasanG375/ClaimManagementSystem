@@ -17,9 +17,23 @@ public partial class Claim
 
     public int? AdjusterId { get; set; }
 
+    public string? DescriptionOfClaim { get; set; }
+
+    public string? AdjusterNotes { get; set; }
+
+    public DateOnly? AdjusterApprovalDate { get; set; }
+
+    public string? AdminNotes { get; set; }
+
+    public DateOnly? AdminApprovalDate { get; set; }
+
     public virtual User? Adjuster { get; set; }
 
     public virtual ICollection<Document> Documents { get; set; } = new List<Document>();
 
     public virtual Policy? Policy { get; set; }
+
+    public string? PolicyHolderName { get; set; }
+
+    public string? FileName { get; set; }
 }

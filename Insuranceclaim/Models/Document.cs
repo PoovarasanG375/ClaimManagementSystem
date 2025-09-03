@@ -11,9 +11,17 @@ public partial class Document
 
     public string? DocumentName { get; set; }
 
+
+
+    public string? FileName { get; set; }
+    public string? FileUrl { get; set; }
+
+
     public string? DocumentPath { get; set; }
 
     public string? DocumentType { get; set; }
 
     public virtual Claim? Claim { get; set; }
 }
+
+

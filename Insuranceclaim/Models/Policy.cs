@@ -23,3 +23,6 @@ public partial class Policy
 
     public virtual User? Policyholder { get; set; }
 }
+
+
+

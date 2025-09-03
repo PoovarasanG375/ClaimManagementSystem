@@ -34,7 +34,7 @@ namespace Insuranceclaim.Controllers
                     case "agent":
                         return RedirectToAction("AgentHome", "AgentDashboard");
                     case "claim-adjuster":
-                        return RedirectToAction("ClaimAdjusterHome", "ClaimAdjusterDashboard");
+                        return RedirectToAction("Index", "ClaimAdjusters");
                     case "policy holder":
                         return RedirectToAction("PolicyHolderHome", "PolicyHolderDashboard");
                     default:

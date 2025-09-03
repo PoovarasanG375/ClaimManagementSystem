@@ -9,23 +9,23 @@ using Insuranceclaim.Models;
 
 namespace Insuranceclaim.Controllers
 {
-    public class ClaimsController : Controller
+    public class ClaimsAdjusterController : Controller
     {
         private readonly ClaimManagementSystemContext _context;
 
-        public ClaimsController(ClaimManagementSystemContext context)
+        public ClaimsAdjusterController(ClaimManagementSystemContext context)
         {
             _context = context;
         }
 
-        // GET: Claims
+        // GET: ClaimsAdjuster
         public async Task<IActionResult> Index()
         {
             var claimManagementSystemContext = _context.Claims.Include(c => c.Adjuster).Include(c => c.Policy);
             return View(await claimManagementSystemContext.ToListAsync());
         }
 
-        // GET: Claims/Details/5
+        // GET: ClaimsAdjuster/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -45,7 +45,7 @@ namespace Insuranceclaim.Controllers
             return View(claim);
         }
 
-        // GET: Claims/Create
+        // GET: ClaimsAdjuster/Create
         public IActionResult Create()
         {
             ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId");
@@ -53,12 +53,12 @@ namespace Insuranceclaim.Controllers
             return View();
         }
 
-        // POST: Claims/Create
+        // POST: ClaimsAdjuster/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ClaimId,PolicyId,ClaimAmount,ClaimDate,ClaimStatus,AdjusterId")] Claim claim)
+        public async Task<IActionResult> Create([Bind("ClaimId,PolicyId,ClaimAmount,ClaimDate,ClaimStatus,AdjusterId,DescriptionOfClaim,AdjusterNotes,AdjusterApprovalDate,AdminNotes,AdminApprovalDate,PolicyHolderName,FileName")] Claim claim)
         {
             if (ModelState.IsValid)
             {
@@ -71,7 +71,7 @@ namespace Insuranceclaim.Controllers
             return View(claim);
         }
 
-        // GET: Claims/Edit/5
+        // GET: ClaimsAdjuster/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -89,12 +89,12 @@ namespace Insuranceclaim.Controllers
             return View(claim);
         }
 
-        // POST: Claims/Edit/5
+        // POST: ClaimsAdjuster/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ClaimId,PolicyId,ClaimAmount,ClaimDate,ClaimStatus,AdjusterId")] Claim claim)
+        public async Task<IActionResult> Edit(int id, [Bind("ClaimId,PolicyId,ClaimAmount,ClaimDate,ClaimStatus,AdjusterId,DescriptionOfClaim,AdjusterNotes,AdjusterApprovalDate,AdminNotes,AdminApprovalDate,PolicyHolderName,FileName")] Claim claim)
         {
             if (id != claim.ClaimId)
             {
@@ -126,7 +126,7 @@ namespace Insuranceclaim.Controllers
             return View(claim);
         }
 
-        // GET: Claims/Delete/5
+        // GET: ClaimsAdjuster/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -146,7 +146,7 @@ namespace Insuranceclaim.Controllers
             return View(claim);
         }
 
-        // POST: Claims/Delete/5
+        // POST: ClaimsAdjuster/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)

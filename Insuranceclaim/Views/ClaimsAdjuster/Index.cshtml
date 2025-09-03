@@ -22,10 +22,31 @@
                 @Html.DisplayNameFor(model => model.ClaimStatus)
             </th>
             <th>
+                @Html.DisplayNameFor(model => model.DescriptionOfClaim)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AdjusterNotes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AdjusterApprovalDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AdminNotes)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.AdminApprovalDate)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.Adjuster)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Policy)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.PolicyHolderName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.FileName)
             </th>
             <th></th>
         </tr>
@@ -43,10 +64,31 @@
                 @Html.DisplayFor(modelItem => item.ClaimStatus)
             </td>
             <td>
+                @Html.DisplayFor(modelItem => item.DescriptionOfClaim)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AdjusterNotes)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AdjusterApprovalDate)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AdminNotes)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.AdminApprovalDate)
+            </td>
+            <td>
                 @Html.DisplayFor(modelItem => item.Adjuster.UserId)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Policy.PolicyId)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.PolicyHolderName)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FileName)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.ClaimId">Edit</a> |

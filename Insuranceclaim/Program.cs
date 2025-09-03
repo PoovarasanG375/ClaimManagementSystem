@@ -1,4 +1,5 @@
 using Insuranceclaim.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Insuranceclaim
 {
@@ -10,7 +11,10 @@ namespace Insuranceclaim
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
-            builder.Services.AddDbContext<ClaimManagementSystemContext>();
+            
+            // Configure DbContext with connection string from configuration
+            builder.Services.AddDbContext<ClaimManagementSystemContext>(options =>
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             var app = builder.Build();
 
