@@ -1,0 +1,134 @@
+﻿@model IEnumerable<Insuranceclaim.Models.Claim>
+
+@{
+    ViewData["Title"] = "Claim Adjuster Portal";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Claim Adjuster Portal</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar {
+            background-color: #488AFB;
+        }
+
+        .navbar-brand, .nav-link {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .content-section {
+            padding: 2rem;
+        }
+
+        .claim-card {
+            margin-bottom: 1.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .claim-card-body {
+            padding: 1.5rem;
+        }
+
+        .claim-details p {
+            margin-bottom: 0.5rem;
+        }
+
+        .claim-details strong {
+            display: inline-block;
+            width: 150px; /* Adjust as needed for alignment */
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Claim Adjuster Portal</a>
+            <a href="@Url.Action("Index", "Home")" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12 content-section">
+                <h4 class="mb-4">Assigned Claims</h4>
+
+                @if (Model != null && Model.Any())
+                {
+                    <div class="row">
+                        @foreach (var item in Model)
+                        {
+                            <div class="col-lg-6 col-md-12">
+                                <div class="card claim-card">
+                                    <div class="card-header bg-primary text-white">
+                                        Claim #@item.ClaimId
+                                    </div>
+                                    <div class="card-body claim-card-body">
+                                        <div class="claim-details">
+                                            <p><strong>Policy ID:</strong> @Html.DisplayFor(modelItem => item.PolicyId)</p>
+                                            <p><strong>Policy Holder Name:</strong> @Html.DisplayFor(modelItem => item.Policy.PolicyName)</p>
+                                            <p><strong>Claim Amount:</strong> @Html.DisplayFor(modelItem => item.ClaimAmount)</p>
+                                            <p><strong>Claim Date:</strong> @Html.DisplayFor(modelItem => item.ClaimDate)</p>
+                                            <p><strong>Claim Status:</strong> @Html.DisplayFor(modelItem => item.ClaimStatus)</p>
+                                            <p><strong>Documents:</strong></p>
+                                            @if (item.Documents != null && item.Documents.Any())
+                                            {
+                                                <ul>
+                                                    @foreach (var doc in item.Documents)
+                                                    {
+                                                        <li>
+                                                            <a href="@doc.DocumentPath" target="_blank">@doc.DocumentName</a>
+                                                        </li>
+                                                    }
+                                                </ul>
+                                            }
+                                            else
+                                            {
+                                                <span>No documents attached.</span>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-end">
+                                        <a asp-action="Edit" asp-route-id="@item.ClaimId" class="btn btn-primary me-2">Edit</a>
+                                        <a asp-action="Details" asp-route-id="@item.ClaimId" class="btn btn-info">Details</a>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info" role="alert">
+                        No claims found.
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

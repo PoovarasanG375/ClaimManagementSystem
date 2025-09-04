@@ -23,6 +23,8 @@ public partial class Policy
 
     public string? Description { get; set; }
 
+    public string? Category { get; set; }
+
     public virtual ICollection<AppliedPolicy> AppliedPolicies { get; set; } = new List<AppliedPolicy>();
 
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();

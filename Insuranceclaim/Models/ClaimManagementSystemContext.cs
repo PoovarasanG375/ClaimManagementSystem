@@ -60,7 +60,11 @@ public partial class ClaimManagementSystemContext : DbContext
             entity.ToTable("Claim");
 
             entity.Property(e => e.ClaimId).HasColumnName("claimId");
+            entity.Property(e => e.AdjusterApprovalDate).HasColumnName("adjusterApprovalDate");
             entity.Property(e => e.AdjusterId).HasColumnName("adjusterId");
+            entity.Property(e => e.AdjusterNotes).HasColumnName("adjusterNotes");
+            entity.Property(e => e.AdminApprovalDate).HasColumnName("adminApprovalDate");
+            entity.Property(e => e.AdminNotes).HasColumnName("adminNotes");
             entity.Property(e => e.ClaimAmount)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("claimAmount");
@@ -121,6 +125,9 @@ public partial class ClaimManagementSystemContext : DbContext
             entity.ToTable("Policy");
 
             entity.Property(e => e.PolicyId).HasColumnName("policyId");
+            entity.Property(e => e.Category)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.CoverageAmount)
                 .HasColumnType("decimal(10, 2)")
                 .HasColumnName("coverageAmount");
@@ -156,6 +163,9 @@ public partial class ClaimManagementSystemContext : DbContext
             entity.Property(e => e.IssueDescription)
                 .HasColumnType("text")
                 .HasColumnName("issueDescription");
+            entity.Property(e => e.Response)
+                .HasMaxLength(255)
+                .IsUnicode(false);
             entity.Property(e => e.TicketStatus)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -192,6 +202,10 @@ public partial class ClaimManagementSystemContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("username");
+
+            entity.HasOne(d => d.Agent).WithMany(p => p.InverseAgent)
+                .HasForeignKey(d => d.AgentId)
+                .HasConstraintName("FK_User_Agent");
         });
 
         OnModelCreatingPartial(modelBuilder);
