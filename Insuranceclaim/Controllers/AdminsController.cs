@@ -9,6 +9,7 @@ using Insuranceclaim.Models;
 
 namespace Insuranceclaim.Controllers
 {
+    [Route("Admin/Admins/[action]")]
     public class AdminsController : Controller
     {
         private readonly ClaimManagementSystemContext _context;
@@ -21,12 +22,27 @@ namespace Insuranceclaim.Controllers
         // GET: Admins
         public async Task<IActionResult> Index()
         {
+            // Fetch total counts for the dashboard
             ViewBag.TotalPolicies = await _context.Policies.CountAsync();
             ViewBag.TotalUsers = await _context.Users.CountAsync();
             ViewBag.TotalTickets = await _context.SupportTickets.CountAsync();
             ViewBag.TotalClaims = await _context.Claims.CountAsync();
 
-            return View();
+            // Fetch recent activity to display on the dashboard
+            ViewBag.RecentPolicies = await _context.Policies
+                                                    .OrderByDescending(p => p.CreatedDate)
+                                                    .Take(5)
+                                                    .ToListAsync();
+            ViewBag.RecentClaims = await _context.Claims
+                                                .OrderByDescending(c => c.ClaimDate)
+                                                .Take(5)
+                                                .ToListAsync();
+            ViewBag.RecentTickets = await _context.SupportTickets
+                                                  .OrderByDescending(t => t.CreatedDate)
+                                                  .Take(5)
+                                                  .ToListAsync();
+
+            return View("~/Views/Admin/Admins/Index.cshtml");
         }
 
         // GET: Admins/Details/5

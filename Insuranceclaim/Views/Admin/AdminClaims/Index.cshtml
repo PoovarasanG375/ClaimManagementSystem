@@ -160,7 +160,7 @@ index
                         <p><strong>Category:</strong> @policy.Category</p>
                         <p><strong>Description:</strong> @policy.Description</p>
                         <p><strong>Coverage:</strong> ₹@policy.CoverageAmount?.ToString("N0")</p>
-                        <p><strong>Premium:</strong> ₹@policy.Premium?.ToString("N0")/year</p>
+                        <p><strong>Premium:</strong> ₹@policy.AnnualPremium?.ToString("N0")/year</p>
                         <p><strong>Status:</strong> @policy.PolicyStatus.ToUpper()</p>
 
                         @if (policy.CreatedDate.HasValue)
@@ -171,7 +171,7 @@ index
                         }
                     </div>
                     <div class="card-actions">
-                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#editPolicyModal" data-policy-id="@policy.PolicyId" data-policy-name="@policy.PolicyName" data-policy-category="@policy.Category" data-coverage-amount="@policy.CoverageAmount" data-premium="@policy.Premium" data-description="@policy.Description">
+                        <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#editPolicyModal" data-policy-id="@policy.PolicyId" data-policy-name="@policy.PolicyName" data-policy-category="@policy.Category" data-coverage-amount="@policy.CoverageAmount" data-premium="@policy.AnnualPremium" data-description="@policy.Description">
 
                             Edit
                         </button>

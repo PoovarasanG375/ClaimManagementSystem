@@ -9,6 +9,7 @@ using Insuranceclaim.Models;
 
 namespace Insuranceclaim.Controllers
 {
+    [Route("Admin/AdminUsers/[action]")]
     public class AdminUsersController : Controller
     {
         private readonly ClaimManagementSystemContext _context;
@@ -32,7 +33,7 @@ namespace Insuranceclaim.Controllers
                 users = users.Where(u => u.Role == roleFilter);
             }
 
-            return View(await users.ToListAsync());
+            return View("~/Views/Admin/AdminUsers/Index.cshtml", await users.ToListAsync());
         }
 
         // GET: AdminUsers/Details/5
@@ -50,13 +51,13 @@ namespace Insuranceclaim.Controllers
                 return NotFound();
             }
 
-            return View(user);
+            return View("~/Views/Admin/AdminUsers/Details.cshtml", user);
         }
 
         // GET: AdminUsers/Create
         public IActionResult Create()
         {
-            return View();
+            return View("~/Views/Admin/AdminUsers/Create.cshtml");
         }
 
         // POST: AdminUsers/Create
@@ -72,7 +73,7 @@ namespace Insuranceclaim.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            return View("~/Views/Admin/AdminUsers/Create.cshtml", user);
         }
 
         // GET: AdminUsers/Edit/5
@@ -88,7 +89,7 @@ namespace Insuranceclaim.Controllers
             {
                 return NotFound();
             }
-            return View(user);
+            return View("~/Views/Admin/AdminUsers/Edit.cshtml", user);
         }
 
         // POST: AdminUsers/Edit/5
@@ -121,7 +122,7 @@ namespace Insuranceclaim.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(user);
+            return View("~/Views/Admin/AdminUsers/Edit.cshtml", user);
         }
 
         // GET: AdminUsers/Delete/5
@@ -139,7 +140,7 @@ namespace Insuranceclaim.Controllers
                 return NotFound();
             }
 
-            return View(user);
+            return View("~/Views/Admin/AdminUsers/Delete.cshtml", user);
         }
 
         // POST: AdminUsers/Delete/5

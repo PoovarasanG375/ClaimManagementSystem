@@ -1,0 +1,477 @@
+﻿@model IEnumerable<Insuranceclaim.Models.Policy>
+
+@{
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    ViewData["Title"] = "Policy Management";
+}
+
+<style>
+    /* Global Styles & Typography */
+    body {
+        font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        color: #333;
+        background-color: #f4f7f9;
+    }
+
+    /* Main container and title */
+    .main-content {
+        padding: 2rem;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: #1a2a3a;
+        margin-bottom: 0;
+    }
+
+    /* Policy Grid &amp; Cards */
+    .policy-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+    }
+
+    .policy-card {
+        background-color: #ffffff;
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: 1px solid #e0e6ed;
+    }
+
+        .policy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .policy-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+        }
+
+        .policy-card p {
+            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+            .policy-card p strong {
+                color: #2c3e50;
+            }
+
+    /* Filter and Actions Section */
+    .row.mb-3.align-items-end {
+        background-color: #ffffff;
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-actions {
+        margin-top: 1rem;
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.75rem;
+    }
+
+    .btn-create-policy {
+        background-color: #2c3e50;
+        color: #fff;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-create-policy:hover {
+            background-color: #1a2a3a;
+        }
+
+    /* Button Styling */
+    .btn {
+        border-radius: 5px;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-info {
+        background-color: #3498db;
+        border-color: #3498db;
+        color: #fff;
+    }
+
+        .btn-info:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+    .btn-warning {
+        background-color: #e67e22; /* A deeper orange-brown */
+        border-color: #d35400;
+        color: #fff;
+    }
+
+        .btn-warning:hover {
+            background-color: #d35400;
+            border-color: #c0392b;
+        }
+
+    .btn-success {
+        background-color: #27ae60;
+        border-color: #27ae60;
+        color: #fff;
+    }
+
+        .btn-success:hover {
+            background-color: #229954;
+            border-color: #229954;
+        }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        border-color: #e74c3c;
+    }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+            border-color: #c0392b;
+        }
+
+    .btn-cancel {
+        background-color: #95a5a6;
+        border-color: #7f8c8d;
+        color: #fff;
+    }
+
+        .btn-cancel:hover {
+            background-color: #7f8c8d;
+            border-color: #6c7a89;
+        }
+
+    /* Modal Styling */
+    .modal-content {
+        border-radius: 10px;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background-color: #34495e;
+        color: #fff;
+        border-top-left-radius: 10px;
+        border-top-right-radius: 10px;
+        border-bottom: none;
+    }
+
+    .modal-title {
+        font-weight: 600;
+    }
+
+    /* New Badge Styles for Policy Status */
+    .status-badge {
+        display: inline-block;
+        padding: 0.25em 0.7em;
+        font-size: 75%;
+        font-weight: 700;
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        vertical-align: middle;
+        border-radius: 0.25rem;
+        color: #fff;
+    }
+
+    .badge-active {
+        background-color: #27ae60;
+    }
+
+    .badge-inactive {
+        background-color: #e67e22;
+    }
+
+    .badge-cancelled {
+        background-color: #e74c3c;
+    }
+</style>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mt-4">
+        <h2>Policy Management</h2>
+        <button type="button" class="btn btn-create-policy" data-bs-toggle="modal" data-bs-target="#addPolicyModal">
+            Create Policy
+        </button>
+    </div>
+
+    <form asp-action="Index" method="get" class="row mb-3 align-items-end">
+        <div class="col-md-3">
+            <label for="category">Filter by Category</label>
+            <select name="category" class="form-control" onchange="this.form.submit()">
+                <option value="All" selected="@(string.IsNullOrEmpty(ViewBag.SelectedCategory) || ViewBag.SelectedCategory == "All")">All Categories</option>
+
+                @foreach (var cat in ViewBag.Categories)
+                {
+                    <option value="@cat" selected="@(cat == ViewBag.SelectedCategory)">@cat</option>
+                }
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label for="status">Filter by Status</label>
+            <select name="status" class="form-control" onchange="this.form.submit()">
+                <option value="All" selected="@(string.IsNullOrEmpty(ViewBag.SelectedStatus) || ViewBag.SelectedStatus == "All")">All Statuses</option>
+
+                @foreach (var stat in ViewBag.Statuses)
+                {
+                    <option value="@stat" selected="@(stat.ToUpper() == ViewBag.SelectedStatus?.ToUpper())">@stat</option>
+                }
+            </select>
+        </div>
+    </form>
+
+    <div class="policy-grid">
+        @if (Model.Any())
+        {
+            @foreach (var policy in Model)
+            {
+                <div class="policy-card">
+                    <div>
+                        <h3>@policy.PolicyName</h3>
+                        <p><strong>Policy Number:</strong> @policy.PolicyNumber</p>
+                        <p><strong>Category:</strong> @policy.Category</p>
+                        <p><strong>Description:</strong> @policy.Description</p>
+                        <p><strong>Coverage:</strong> ₹@policy.CoverageAmount?.ToString("N0")</p>
+                        <p><strong>Premium:</strong> ₹@policy.AnnualPremium?.ToString("N0")/year</p>
+                        <p>
+                            <strong>Status:</strong>
+                            <span class="status-badge @(policy.PolicyStatus?.ToUpper() == "ACTIVE" ? "badge-active" : policy.PolicyStatus?.ToUpper() == "INACTIVE" ? "badge-inactive" : "badge-cancelled")">
+                                @policy.PolicyStatus.ToUpper()
+                            </span>
+                        </p>
+                        @if (policy.CreatedDate.HasValue)
+                        {
+                            <p><strong>Created Date:</strong> @policy.CreatedDate.Value.ToShortDateString()</p>
+                        }
+                    </div>
+                    <div class="card-actions">
+                        @if (policy.PolicyStatus?.ToUpper() != "CANCELLED")
+                        {
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#editPolicyModal" data-policy-id="@policy.PolicyId" data-policy-name="@policy.PolicyName" data-policy-category="@policy.Category" data-coverage-amount="@policy.CoverageAmount" data-annual-premium="@policy.AnnualPremium" data-description="@policy.Description">
+                                Edit
+                            </button>
+                            <form asp-action="ToggleStatus" asp-route-id="@policy.PolicyId" method="post" class="d-inline">
+                                <button type="submit" class="btn @(policy.PolicyStatus?.ToUpper() == "ACTIVE" ? "btn-warning" : "btn-success")">
+                                    @(policy.PolicyStatus?.ToUpper() == "ACTIVE" ? "Deactivate" : "Activate")
+                                </button>
+                            </form>
+                            <button type="button" class="btn btn-cancel" data-bs-toggle="modal" data-bs-target="#confirmCancelModal" data-policy-id="@policy.PolicyId">Cancel</button>
+                        }
+                    </div>
+                </div>
+            }
+        }
+        else
+        {
+            <div class="alert alert-info text-center">
+                No policies found that match the selected filters.
+            </div>
+        }
+    </div>
+
+</div>
+
+<div class="modal fade" id="addPolicyModal" tabindex="-1" aria-labelledby="addPolicyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPolicyModalLabel">Add New Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form asp-action="Create" asp-controller="AdminPolicies" method="post">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="policyNumber" class="form-label">Policy Number</label>
+                        <input type="text" class="form-control" id="policyNumber" name="PolicyNumber" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="policyCategory" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="policyCategory" name="Category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="policyType" class="form-label">Type</label>
+                        <select class="form-select" id="policyType" name="Type" required>
+                            <option value="">--Select--</option>
+                            <option value="Basic">BASIC</option>
+                            <option value="Advanced">ADVANCED</option>
+                            <option value="AnnualPremium">ANNUAL PREMIUM</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="policyName" class="form-label">Policy Name</label>
+                        <input type="text" class="form-control" id="policyName" name="PolicyName" readonly required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="coverageAmount" class="form-label">Coverage Amount</label>
+                        <input type="number" class="form-control" id="coverageAmount" name="CoverageAmount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="annualPremium" class="form-label">Premium</label>
+                        <input type="number" class="form-control" id="annualPremium" name="AnnualPremium" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="policyDescription" class="form-label">Description</label>
+<textarea class="form-control" id="policyDescription" name="Description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="policyStatus" class="form-label">Status</label>
+                        <select class="form-select" id="policyStatus" name="PolicyStatus" required>
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="INACTIVE">INACTIVE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Policy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="editPolicyModal" tabindex="-1" aria-labelledby="editPolicyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editPolicyModalLabel">Edit Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editPolicyForm" asp-action="Edit" asp-controller="AdminPolicies" method="post">
+                <div class="modal-body">
+                    <input type="hidden" id="edit-policyId" name="PolicyId" />
+                    <div class="mb-3">
+                        <label for="edit-policyName" class="form-label">Policy Name</label>
+                        <input type="text" class="form-control" id="edit-policyName" name="PolicyName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-category" class="form-label">Category</label>
+                        <input type="text" class="form-control" id="edit-category" name="Category" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-coverageAmount" class="form-label">Coverage Amount</label>
+                        <input type="number" class="form-control" id="edit-coverageAmount" name="CoverageAmount" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-annualPremium" class="form-label">Premium</label>
+                        <input type="number" class="form-control" id="edit-annualPremium" name="AnnualPremium" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit-description" class="form-label">Description</label>
+<textarea class="form-control" id="edit-description" name="Description" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="confirmCancelModal" tabindex="-1" aria-labelledby="confirmCancelModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmCancelModalLabel">Confirm Cancellation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to cancel this policy? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <form id="cancelPolicyForm" asp-action="Cancel" asp-controller="AdminPolicies" method="post">
+                    <input type="hidden" id="cancel-policyId" name="id" />
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+                    <button type="submit" class="btn btn-danger">Yes, Cancel</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+        // JavaScript to populate the edit modal with policy data
+        document.getElementById('editPolicyModal').addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var policyId = button.getAttribute('data-policy-id');
+        var policyName = button.getAttribute('data-policy-name');
+        var policyCategory = button.getAttribute('data-policy-category');
+        var coverageAmount = button.getAttribute('data-coverage-amount');
+        var annualPremium = button.getAttribute('data-annual-premium'); // Corrected
+        var description = button.getAttribute('data-description');
+        var modal = this;
+        modal.querySelector('#edit-policyId').value = policyId;
+        modal.querySelector('#edit-policyName').value = policyName;
+        modal.querySelector('#edit-category').value = policyCategory;
+        modal.querySelector('#edit-coverageAmount').value = coverageAmount;
+        modal.querySelector('#edit-annualPremium').value = annualPremium; // Corrected
+        modal.querySelector('#edit-description').value = description;
+        });
+
+                // JavaScript for populating the cancel modal
+                document.getElementById('confirmCancelModal').addEventListener('show.bs.modal', function(event) {
+                    var button = event.relatedTarget;
+                    var policyId = button.getAttribute('data-policy-id');
+                    var modal = this;
+                    modal.querySelector('#cancel-policyId').value = policyId;
+                });
+
+                // JavaScript for auto-populating policy name in the Add New Policy modal
+                const policyCategory = document.getElementById('policyCategory');
+                const policyType = document.getElementById('policyType');
+                const policyName = document.getElementById('policyName');
+                function updatePolicyName() {
+                    const categoryValue = policyCategory.value;
+                    const typeValue = policyType.value;
+                    if (categoryValue && typeValue) {
+                        policyName.value = categoryValue + ' ' + typeValue;
+                    } else {
+                        policyName.value = '';
+                    }
+                }
+                policyCategory.addEventListener('input', updatePolicyName);
+                policyType.addEventListener('change', updatePolicyName);
+
+                // AJAX submit for Edit Policy form
+                document.getElementById('editPolicyForm').addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    var form = this;
+                    var formData = new FormData(form);
+                    fetch(form.action, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            var editModal = bootstrap.Modal.getInstance(document.getElementById('editPolicyModal'));
+                            editModal.hide();
+                            location.reload();
+                        } else {
+                            // Use a custom message box instead of alert()
+                            // This requires a pre-built modal or message box UI
+                            console.error('Failed to update policy.');
+                            // You could add logic here to show a dedicated message modal
+                        }
+                    });
+                });
+            });
+    </script>
+
+}

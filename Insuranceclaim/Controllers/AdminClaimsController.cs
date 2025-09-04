@@ -9,6 +9,7 @@ using Insuranceclaim.Models;
 
 namespace Insuranceclaim.Controllers
 {
+    [Route("Admin/AdminClaims/[action]")]
     public class AdminClaimsController : Controller
     {
         private readonly ClaimManagementSystemContext _context;
@@ -22,7 +23,7 @@ namespace Insuranceclaim.Controllers
         public async Task<IActionResult> Index()
         {
             var claimManagementSystemContext = _context.Claims.Include(c => c.Adjuster).Include(c => c.Policy);
-            return View(await claimManagementSystemContext.ToListAsync());
+            return View("~/Views/Admin/AdminClaims/Index.cshtml", await claimManagementSystemContext.ToListAsync());
         }
 
         // GET: AdminClaim/Details/5
@@ -42,7 +43,7 @@ namespace Insuranceclaim.Controllers
                 return NotFound();
             }
 
-            return View(claim);
+            return View("~/Views/Admin/AdminClaims/Details.cshtml", claim);
         }
 
         // GET: AdminClaim/Create
@@ -50,7 +51,7 @@ namespace Insuranceclaim.Controllers
         {
             ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId");
             ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId");
-            return View();
+            return View("~/Views/Admin/AdminClaims/Create.cshtml");
         }
 
         // POST: AdminClaim/Create
@@ -68,7 +69,7 @@ namespace Insuranceclaim.Controllers
             }
             ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId", claim.AdjusterId);
             ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId", claim.PolicyId);
-            return View(claim);
+            return View("~/Views/Admin/AdminClaims/Create.cshtml", claim);
         }
 
         // GET: AdminClaim/Edit/5
@@ -86,7 +87,7 @@ namespace Insuranceclaim.Controllers
             }
             ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId", claim.AdjusterId);
             ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId", claim.PolicyId);
-            return View(claim);
+            return View("~/Views/Admin/AdminClaims/Edit.cshtml", claim);
         }
 
         // POST: AdminClaim/Edit/5
@@ -123,7 +124,7 @@ namespace Insuranceclaim.Controllers
             }
             ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId", claim.AdjusterId);
             ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId", claim.PolicyId);
-            return View(claim);
+            return View("~/Views/Admin/AdminClaims/Edit.cshtml", claim);
         }
 
         // GET: AdminClaim/Delete/5
@@ -143,7 +144,7 @@ namespace Insuranceclaim.Controllers
                 return NotFound();
             }
 
-            return View(claim);
+            return View("~/Views/Admin/AdminClaims/Delete.cshtml", claim);
         }
 
         // POST: AdminClaim/Delete/5

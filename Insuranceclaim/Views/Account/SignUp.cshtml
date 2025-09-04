@@ -23,6 +23,7 @@
                 <option value="">-- Select User Type --</option>
                 <option value="Agent">Agent</option>
                 <option value="POLICY HOLDER">Policy Holder</option>
+                <option value="ADMIN" >ADMIN</option>
             </select>
 
             <label>Email</label>
@@ -39,5 +40,8 @@
 
             <button type="submit" class="btn btn-register mt-3">Register</button>
         </form>
+        <div class="text-center mt-3">
+            <p>Already have an account? <a href="@Url.Action("Login", "Account")">Sign up</a></p>
+        </div>
     </div>
 </div>

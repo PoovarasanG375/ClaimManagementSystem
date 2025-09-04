@@ -1,177 +1,92 @@
 ﻿using Insuranceclaim.Models;
-
 using Microsoft.AspNetCore.Mvc;
-
 using Microsoft.EntityFrameworkCore;
-
 using System.Linq;
-
 using System.Threading.Tasks;
-
 using System;
 
 namespace Insuranceclaim.Controllers
-
 {
-
+    [Route("Admin/AdminSupportTickets/[action]")]
     public class AdminSupportTicketsController : Controller
-
     {
-
         private readonly ClaimManagementSystemContext _context;
 
         public AdminSupportTicketsController(ClaimManagementSystemContext context)
-
         {
-
             _context = context;
-
         }
 
         // GET: AdminSupportTickets
-
         public async Task<IActionResult> Index(string statusFilter)
-
         {
-
             var supportTicketsQuery = _context.SupportTickets
-
                 .Include(s => s.User)
-
                 .AsQueryable();
 
-            // Apply filtering if a status is selected
-
             if (!string.IsNullOrEmpty(statusFilter) && statusFilter != "All")
-
             {
-
                 supportTicketsQuery = supportTicketsQuery.Where(s => s.TicketStatus == statusFilter);
-
             }
 
-            // Order tickets by created date, latest first
-
             var supportTickets = await supportTicketsQuery
-
                 .OrderByDescending(s => s.CreatedDate)
-
                 .ToListAsync();
 
-            ViewBag.StatusFilter = statusFilter; // Pass the current filter to the view
-
-            return View(supportTickets);
-
+            ViewBag.StatusFilter = statusFilter;
+            return View("~/Views/Admin/AdminSupportTickets/Index.cshtml", supportTickets);
         }
 
         // GET: AdminSupportTickets/Details/5
-
         public async Task<IActionResult> Details(int? id)
-
         {
-
             if (id == null)
-
             {
-
                 return NotFound();
-
             }
 
             var supportTicket = await _context.SupportTickets
-
                 .Include(s => s.User)
-
                 .FirstOrDefaultAsync(m => m.TicketId == id);
 
             if (supportTicket == null)
-
             {
-
                 return NotFound();
-
             }
 
-            // Corrected Logic: Change status to "In Progress" only if it's "Open"
-
-            if (supportTicket.TicketStatus == "Open")
-
-            {
-
-                supportTicket.TicketStatus = "In Progress";
-
-                _context.Update(supportTicket);
-
-                await _context.SaveChangesAsync();
-
-            }
-
-            return View(supportTicket);
-
+            return View("~/Views/Admin/AdminSupportTickets/Details.cshtml", supportTicket);
         }
 
-        // POST: AdminSupportTickets/UpdateStatus
-
+        // POST: AdminSupportTickets/UpdateTicket - Handles both status and response updates
         [HttpPost]
-
         [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> UpdateStatus(int id, string newStatus)
-
+        public async Task<IActionResult> UpdateTicket(int ticketId, string responseMessage)
         {
-
-            var ticket = await _context.SupportTickets.FindAsync(id);
-
-            if (ticket == null)
-
-            {
-
-                return NotFound();
-
-            }
-
-            ticket.TicketStatus = newStatus;
-
-            _context.Update(ticket);
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Details), new { id = ticket.TicketId });
-
-        }
-
-        // POST: AdminSupportTickets/Respond
-
-        [HttpPost]
-
-        [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Respond(int ticketId, string responseMessage)
-
-        {
-
             var ticket = await _context.SupportTickets.FindAsync(ticketId);
 
             if (ticket == null)
-
             {
-
                 return NotFound();
-
             }
 
-            ticket.Response = responseMessage;
-
-            ticket.TicketStatus = "Resolved"; // Automatically set to Resolved upon giving a response
+            // If a response is provided, automatically change the status to "Resolved"
+            if (!string.IsNullOrEmpty(responseMessage))
+            {
+                ticket.Response = responseMessage;
+                ticket.TicketStatus = "Resolved"; // Set status to Resolved
+            }
+            else
+            {
+                // If the response is cleared, the ticket should revert to "Open".
+                // This is a good practice to handle cases where an admin clears a response.
+                ticket.Response = null;
+                ticket.TicketStatus = "Open";
+            }
 
             _context.Update(ticket);
-
             await _context.SaveChangesAsync();
 
             return RedirectToAction(nameof(Details), new { id = ticketId });
-
         }
-
     }
-
 }

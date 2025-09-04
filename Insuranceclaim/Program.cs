@@ -1,4 +1,5 @@
 using Insuranceclaim.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Insuranceclaim
 {
@@ -11,6 +12,13 @@ namespace Insuranceclaim
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddDbContext<ClaimManagementSystemContext>();
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+    });
 
             var app = builder.Build();
 
