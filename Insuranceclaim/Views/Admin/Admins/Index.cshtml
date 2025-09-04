@@ -1,0 +1,56 @@
+﻿@{
+
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+<div class="main-content">
+    <div class="dashboard-grid">
+
+        <div class="card">
+            <span class="card-icon">&#x1F4C4;</span>
+            <div class="card-title">Total Policies</div>
+            <div class="card-value">@ViewBag.TotalPolicies</div>
+            <div class="card-description">
+
+                Number of active insurance policies currently managed across all categories.
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="card-icon">&#x1F5C3;</span>
+            <div class="card-title">Pending Claims</div>
+            <div class="card-value">@ViewBag.PendingClaims</div>
+            <div class="card-description">
+                Number of claims are awaiting review and approved by claim adjusters.
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="card-icon">&#x1F465;</span>
+            <div class="card-title">Active Users</div>
+            <div class="card-value">@ViewBag.ActiveUsers</div>
+            <div class="card-description">
+
+                Number of users are actively using the insurance platform.
+            </div>
+        </div>
+
+        <div class="card">
+            <span class="card-icon">&#x1F39F;</span>
+            <div class="card-title">Open Tickets</div>
+            <div class="card-value">@ViewBag.OpenTickets</div>
+            <div class="card-description">
+
+                Number of support tickets are currently open and being addressed by the team.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+}

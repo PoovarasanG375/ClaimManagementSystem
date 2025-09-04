@@ -15,6 +15,8 @@ public partial class AppliedPolicy
 
     public int ApplyId { get; set; }
 
+    public decimal? Remainingamount { get; set; }
+
     public virtual Policy? Policy { get; set; }
 
     public virtual User? User { get; set; }

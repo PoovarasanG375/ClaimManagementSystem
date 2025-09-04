@@ -42,6 +42,7 @@ public partial class ClaimManagementSystemContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.PolicyId).HasColumnName("policyId");
+            entity.Property(e => e.Remainingamount).HasColumnType("decimal(10, 2)");
             entity.Property(e => e.UserId).HasColumnName("userId");
 
             entity.HasOne(d => d.Policy).WithMany(p => p.AppliedPolicies)
@@ -171,6 +172,9 @@ public partial class ClaimManagementSystemContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("ticketStatus");
             entity.Property(e => e.UserId).HasColumnName("userId");
+            entity.Property(e => e.Username)
+                .HasMaxLength(50)
+                .IsUnicode(false);
 
             entity.HasOne(d => d.User).WithMany(p => p.SupportTickets)
                 .HasForeignKey(d => d.UserId)

@@ -1,0 +1,170 @@
+﻿views/Admin/AdminSupportTickets/Index.cshtml
+@model IEnumerable<Insuranceclaim.Models.SupportTicket>
+
+@{
+
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    ViewData["Title"] = "Support Tickets";
+
+}
+
+<style>
+
+    /* New Styles for the Support Tickets Index Page */
+
+    :root {
+        --primary-blue: #3498db;
+        --secondary-gray: #7f8c8d;
+        --background-light: #f5f7fa;
+        --card-bg: #ffffff;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --text-dark: #2c3e50;
+    }
+
+    body {
+        font-family: 'Segoe UI', Arial, sans-serif;
+        background-color: var(--background-light);
+    }
+
+    .main-content {
+        padding: 2.5rem;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: var(--text-dark);
+        border-bottom: 2px solid var(--primary-blue);
+        padding-bottom: 0.5rem;
+    }
+
+    .filter-section {
+        background-color: var(--card-bg);
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .support-ticket-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .ticket-card {
+        background-color: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 10px;
+        box-shadow: var(--card-shadow);
+        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    }
+
+        .ticket-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+    .ticket-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+        .ticket-header h4 {
+            margin: 0;
+            font-weight: 600;
+            color: var(--text-dark);
+            font-size: 1.25rem;
+        }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+
+    .status-resolved {
+        background-color: #2ecc71; /* Green */
+
+        color: #fff;
+    }
+
+    .status-open {
+        background-color: #e74c3c; /* Red */
+
+        color: #fff;
+    }
+
+    .ticket-info p {
+        margin: 0.5rem 0;
+        font-size: 0.95rem;
+        color: var(--secondary-gray);
+    }
+
+    .ticket-info strong {
+        color: var(--text-dark);
+    }
+
+    .view-details-btn {
+        align-self: flex-end;
+        margin-top: 1rem;
+    }
+</style>
+
+<div class="main-content">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+        <h2>Support Tickets</h2>
+    </div>
+
+    <div class="filter-section d-flex justify-content-center gap-3 mb-4">
+        <a asp-action="Index" asp-route-statusFilter="All" class="btn @(string.IsNullOrEmpty(ViewBag.StatusFilter) || ViewBag.StatusFilter == "All" ? "btn-primary" : "btn-outline-primary")">All</a>
+        <a asp-action="Index" asp-route-statusFilter="Open" class="btn @(ViewBag.StatusFilter == "Open" ? "btn-primary" : "btn-outline-primary")">Open</a>
+        <a asp-action="Index" asp-route-statusFilter="Resolved" class="btn @(ViewBag.StatusFilter == "Resolved" ? "btn-primary" : "btn-outline-primary")">Resolved</a>
+    </div>
+
+    <div class="support-ticket-container">
+
+        @if (Model.Any())
+
+        {
+
+            @foreach (var ticket in Model)
+
+            {
+                <div class="ticket-card">
+                    <div class="ticket-header">
+                        <span class="status-badge @(ticket.TicketStatus?.ToLower() == "resolved" ? "status-resolved" : "status-open")">
+
+                            @ticket.TicketStatus
+                        </span>
+                        <h4>Ticket #@ticket.TicketId</h4>
+                    </div>
+                    <div class="ticket-info">
+                        <p><strong>Username:</strong> @ticket.User?.Username</p>
+                        <p><strong>Created:</strong> @ticket.CreatedDate?.ToString("dd/MM/yyyy")</p>
+                        <p><strong>Description:</strong> @ticket.IssueDescription</p>
+                        <p><strong>Response:</strong> @(!string.IsNullOrEmpty(ticket.Response) ? ticket.Response : "No response yet.")</p>
+                    </div>
+                    <div class="view-details-btn">
+                        <a asp-controller="AdminSupportTickets" asp-action="Details" asp-route-id="@ticket.TicketId" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+
+            }
+
+        }
+
+        else
+
+        {
+            <div class="alert alert-info text-center">
+
+                No support tickets found for the selected status.
+            </div>
+
+        }
+    </div>
+</div>

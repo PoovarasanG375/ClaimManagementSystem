@@ -54,25 +54,34 @@
                 <div class="row">
                     @foreach (var policy in category.Value)
                     {
-                        <div class="col-md-6 col-lg-4 mb-4">
-                            <div class="card-policy">
-                                <div class="policy-title">@policy.PolicyName</div>
-                                <span class="policy-tag">@policy.PolicyName?.Split(' ')[0]</span>
-                                <div class="details mt-3">
-                                    <span>Coverage <span class="float-end currency">@policy.CoverageAmount?.ToString("C0")</span></span>
-                                    <span>Annual Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span>
+                        <!-- 1. UPDATED: Added col-12 for mobile and col-xl-4 for extra-large screens -->
+                        <div class="col-12 col-md-6 col-lg-4 mb-4">
+                            <!-- 2. UPDATED: Added flexbox classes to make cards equal height -->
+                            <div class="card-policy h-100 d-flex flex-column">
+                                <!-- This div holds the main content -->
+                                <div>
+                                    <div class="policy-title">@policy.PolicyName</div>
+                                    <span class="policy-tag">@policy.PolicyName?.Split(' ')[0]</span>
+                                    <div class="details mt-3">
+                                        <span>Coverage <span class="float-end currency">@policy.CoverageAmount?.ToString("C0")</span></span>
+                                        <span>Annual Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span>
+                                    </div>
+                                    <div class="description mt-3">
+                                        @policy.Description
+                                    </div>
                                 </div>
-                                <div class="description mt-3">
-                                    @policy.Description
+
+                                <!-- 3. UPDATED: 'mt-auto' pushes this div to the bottom of the card -->
+                                <div class="mt-auto pt-3">
+                                    @if (policy.PolicyStatus == "Enrolled" || policy.PolicyStatus == "Active")
+                                    {
+                                        <button class="btn btn-already-enrolled w-100">Already Enrolled</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-enroll w-100" data-bs-toggle="modal" data-bs-target="#enrollmentConfirmModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">Enroll Now</button>
+                                    }
                                 </div>
-                                @if (policy.PolicyStatus == "Enrolled" || policy.PolicyStatus == "Active")
-                                {
-                                    <button class="btn btn-already-enrolled">Already Enrolled</button>
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn btn-enroll" data-bs-toggle="modal" data-bs-target="#enrollmentConfirmModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">Enroll Now</button>
-                                }
                             </div>
                         </div>
                     }
@@ -116,4 +125,4 @@
             });
         });
     </script>
-    }
+}

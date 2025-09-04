@@ -17,5 +17,7 @@ public partial class SupportTicket
 
     public string? Response { get; set; }
 
+    public string? Username { get; set; }
+
     public virtual User? User { get; set; }
 }

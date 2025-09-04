@@ -31,6 +31,13 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("MyPolicies", "Policyholder");
             }
 
+            var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
+            if (appliedPolicy == null)
+            {
+                TempData["ErrorMessage"] = "No enrollment found for this policy.";
+                return RedirectToAction("MyPolicies", "Policyholder");
+            }
+
             // Minimum claim amount check
             if (claimAmount < 5000m)
             {
@@ -38,8 +45,8 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("MyPolicies", "Policyholder");
             }
 
-            // Ensure policy has remaining coverage
-            var remainingCoverage = policy.CoverageAmount ?? 0m;
+            // Ensure applied policy has remaining coverage
+            var remainingCoverage = appliedPolicy.Remainingamount ?? policy.CoverageAmount ?? 0m;
             if (remainingCoverage <= 0)
             {
                 TempData["ErrorMessage"] = "No remaining coverage available for this policy.";
@@ -88,17 +95,12 @@ namespace Insuranceclaim.Controllers
                 _context.SaveChanges();
             }
 
-            // Deduct claimed amount from policy remaining coverage
-            policy.CoverageAmount = (policy.CoverageAmount ?? 0m) - claimAmount;
-            _context.Policies.Update(policy);
+            // Deduct claimed amount from applied policy remaining coverage
+            appliedPolicy.Remainingamount = (appliedPolicy.Remainingamount ?? policy.CoverageAmount ?? 0m) - claimAmount;
+            appliedPolicy.EnrollementStatus = "Submittedforclaim";
+            _context.AppliedPolicies.Update(appliedPolicy);
 
-            // Update AppliedPolicy status to Submittedforclaim (do not remove AppliedPolicy)
-            var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
-            if (appliedPolicy != null)
-            {
-                appliedPolicy.EnrollementStatus = "Submittedforclaim";
-                _context.AppliedPolicies.Update(appliedPolicy);
-            }
+            // Do NOT update Policy.CoverageAmount
 
             _context.SaveChanges();
 

@@ -33,7 +33,7 @@ namespace Insuranceclaim.Controllers
                 switch (usertype.ToLower())
                 {
                     case "admin":
-                        return RedirectToAction("AdminHome", "AdminDashboard");
+                        return RedirectToAction("Index", "Admins");
                     case "agent":
                         return RedirectToAction("AgentHome", "AgentDashboard");
                     case "claim-adjuster":

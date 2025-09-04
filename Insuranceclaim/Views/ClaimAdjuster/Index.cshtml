@@ -87,7 +87,8 @@
                                     <div class="card-body claim-card-body">
                                         <div class="claim-details">
                                             <p><strong>Policy ID:</strong> @Html.DisplayFor(modelItem => item.PolicyId)</p>
-                                            <p><strong>Policy Holder Name:</strong> @Html.DisplayFor(modelItem => item.Policy.PolicyName)</p>
+                                            <p><strong>Policy Name:</strong> @Html.DisplayFor(modelItem => item.Policy.PolicyName)</p>
+                                            <p><strong>Policy Holder Name:</strong> @Html.DisplayFor(modelItem => item.User.Username)</p>
                                             <p><strong>Claim Amount:</strong> @Html.DisplayFor(modelItem => item.ClaimAmount)</p>
                                             <p><strong>Claim Date:</strong> @Html.DisplayFor(modelItem => item.ClaimDate)</p>
                                             <p><strong>Claim Status:</strong> @Html.DisplayFor(modelItem => item.ClaimStatus)</p>
