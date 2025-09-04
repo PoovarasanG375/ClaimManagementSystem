@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 
 
-namespace Insuranceclaim.Models
+namespace Insuranceclaim.Controllers
 {
     public class HomeController : Controller
     {
