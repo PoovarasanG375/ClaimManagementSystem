@@ -25,8 +25,6 @@ public partial class Policy
 
     public string? Description { get; set; }
 
-    public string? DescriptionofIncident { get; set; }
-
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
 
     public virtual User? Policyholder { get; set; }

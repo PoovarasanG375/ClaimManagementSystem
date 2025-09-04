@@ -51,6 +51,9 @@ public partial class ClaimManagementSystemContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("claimStatus");
+            entity.Property(e => e.DescriptionofIncident)
+                .HasMaxLength(255)
+                .IsUnicode(false);
             entity.Property(e => e.PolicyId).HasColumnName("policyId");
             entity.Property(e => e.UserId).HasColumnName("userId");
 
@@ -105,7 +108,6 @@ public partial class ClaimManagementSystemContext : DbContext
                 .HasColumnName("coverageAmount");
             entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
             entity.Property(e => e.Description).HasMaxLength(500);
-            entity.Property(e => e.DescriptionofIncident).HasMaxLength(500);
             entity.Property(e => e.PolicyName)
                 .HasMaxLength(100)
                 .IsUnicode(false)
