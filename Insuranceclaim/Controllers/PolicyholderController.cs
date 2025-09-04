@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Claim = System.Security.Claims.Claim;
+using Microsoft.EntityFrameworkCore;
 
 namespace Insuranceclaim.Controllers
 {
@@ -29,24 +30,42 @@ namespace Insuranceclaim.Controllers
 
             // Get all policies
             var allPolicies = _context.Policies.ToList();
-            // Get applied policies for the user with status 'Enrolled' or 'Active'
-            var enrolledPolicyIds = _context.AppliedPolicies
-                .Where(ap => ap.UserId == userId && (ap.EnrollementStatus == "Enrolled" || ap.EnrollementStatus == "Active"))
-                .Select(ap => ap.PolicyId)
+
+            // Get applied policies for the user
+            var appliedPolicies = _context.AppliedPolicies
+                .Where(ap => ap.UserId == userId)
                 .ToList();
 
-            // Mark enrolled policies
+            // Determine policy status based on AppliedPolicies.EnrollementStatus
             foreach (var policy in allPolicies)
             {
-                if (enrolledPolicyIds.Contains(policy.PolicyId))
+                var applied = appliedPolicies.FirstOrDefault(ap => ap.PolicyId == policy.PolicyId);
+                if (applied != null)
                 {
-                    policy.PolicyStatus = "Enrolled";
+                    var status = (applied.EnrollementStatus ?? string.Empty).ToLower();
+                    if (status == "enrolled" || status == "submittedforclaim")
+                    {
+                        policy.PolicyStatus = "Enrolled"; // show Already Enrolled
+                    }
+                    else if (status == "available")
+                    {
+                        policy.PolicyStatus = "Available"; // show Enroll Now
+                    }
+                    else if (status == "claimed")
+                    {
+                        policy.PolicyStatus = "Available"; // claimed -> can enroll again
+                    }
+                    else
+                    {
+                        policy.PolicyStatus = "Available";
+                    }
                 }
                 else
                 {
-                    policy.PolicyStatus = "Available";
+                    policy.PolicyStatus = "Available"; // no applied policy -> available to enroll
                 }
             }
+
             return View(allPolicies);
         }
 
@@ -58,12 +77,12 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Get applied policies for the user
+            // Get applied policies for the user with relevant statuses
             var appliedPolicies = _context.AppliedPolicies
-                .Where(ap => ap.UserId == userId && (ap.EnrollementStatus == "Enrolled" || ap.EnrollementStatus == "Active"))
+                .Where(ap => ap.UserId == userId)
                 .ToList();
 
-            // Get policy details for each applied policy
+            // Join applied policies with policy details
             var enrolledPolicies = appliedPolicies
                 .Join(_context.Policies,
                       ap => ap.PolicyId,
@@ -82,9 +101,8 @@ namespace Insuranceclaim.Controllers
                       })
                 .ToList();
 
-            // Remove policies for which a claim has already been submitted
-            var claimedPolicyIds = _context.Claims.Where(c => c.UserId == userId).Select(c => c.PolicyId).ToList();
-            enrolledPolicies = enrolledPolicies.Where(p => !claimedPolicyIds.Contains(p.PolicyId)).ToList();
+            // Exclude policies where remaining coverage is 0 or less
+            enrolledPolicies = enrolledPolicies.Where(p => (p.CoverageAmount ?? 0m) > 0).ToList();
 
             if (TempData["ErrorMessage"] != null)
                 ViewBag.ErrorMessage = TempData["ErrorMessage"];
@@ -95,16 +113,16 @@ namespace Insuranceclaim.Controllers
         }
 
         [HttpGet]
-        public IActionResult Support()
-        {
-            return View();
-        }
-
-        [HttpGet]
         public IActionResult MyClaims()
         {
             // This method is now handled in ClaimController
             return RedirectToAction("MyClaims", "Claim");
+        }
+
+        [HttpGet]
+        public IActionResult Support()
+        {
+            return View();
         }
 
         [HttpPost]
@@ -115,22 +133,33 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            var isAlreadyEnrolled = _context.AppliedPolicies.Any(ap => ap.UserId == userId && ap.PolicyId == policyId);
+            var isAlreadyEnrolled = _context.AppliedPolicies.Any(ap => ap.UserId == userId && ap.PolicyId == policyId && (ap.EnrollementStatus == "Enrolled" || ap.EnrollementStatus == "Submittedforclaim"));
             if (isAlreadyEnrolled)
             {
                 return RedirectToAction("AvailablePolicies");
             }
 
-            var newAppliedPolicy = new AppliedPolicy
+            var existing = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
+            if (existing != null)
             {
-                UserId = userId,
-                PolicyId = policyId,
-                EnrollementStatus = "Enrolled", // A more descriptive status for the enrollment
-                CreatedDate = DateOnly.FromDateTime(DateTime.Now)
-            };
+                existing.EnrollementStatus = "Enrolled";
+                existing.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
+                _context.AppliedPolicies.Update(existing);
+            }
+            else
+            {
+                var newAppliedPolicy = new AppliedPolicy
+                {
+                    UserId = userId,
+                    PolicyId = policyId,
+                    EnrollementStatus = "Enrolled",
+                    CreatedDate = DateOnly.FromDateTime(DateTime.Now)
+                };
 
-            _context.AppliedPolicies.Add(newAppliedPolicy);
-            _context.SaveChanges(); // This line was missing
+                _context.AppliedPolicies.Add(newAppliedPolicy);
+            }
+
+            _context.SaveChanges();
 
             return RedirectToAction("MyPolicies");
         }

@@ -31,7 +31,22 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("MyPolicies", "Policyholder");
             }
 
-            if (claimAmount > (policy.CoverageAmount ?? 0))
+            // Minimum claim amount check
+            if (claimAmount < 5000m)
+            {
+                TempData["ErrorMessage"] = "Minimum claim amount is ?5,000.";
+                return RedirectToAction("MyPolicies", "Policyholder");
+            }
+
+            // Ensure policy has remaining coverage
+            var remainingCoverage = policy.CoverageAmount ?? 0m;
+            if (remainingCoverage <= 0)
+            {
+                TempData["ErrorMessage"] = "No remaining coverage available for this policy.";
+                return RedirectToAction("MyPolicies", "Policyholder");
+            }
+
+            if (claimAmount > remainingCoverage)
             {
                 TempData["ErrorMessage"] = "Coverage limit exceeded.";
                 return RedirectToAction("MyPolicies", "Policyholder");
@@ -73,16 +88,22 @@ namespace Insuranceclaim.Controllers
                 _context.SaveChanges();
             }
 
-            // Remove from MyPolicies (delete from AppliedPolicies)
+            // Deduct claimed amount from policy remaining coverage
+            policy.CoverageAmount = (policy.CoverageAmount ?? 0m) - claimAmount;
+            _context.Policies.Update(policy);
+
+            // Update AppliedPolicy status to Submittedforclaim (do not remove AppliedPolicy)
             var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
             if (appliedPolicy != null)
             {
-                _context.AppliedPolicies.Remove(appliedPolicy);
-                _context.SaveChanges();
+                appliedPolicy.EnrollementStatus = "Submittedforclaim";
+                _context.AppliedPolicies.Update(appliedPolicy);
             }
 
+            _context.SaveChanges();
+
             TempData["SuccessMessage"] = "Claim submitted successfully.";
-            return RedirectToAction("MyClaims");
+            return RedirectToAction("MyClaims", "Claim");
         }
 
         [HttpGet]
@@ -99,6 +120,29 @@ namespace Insuranceclaim.Controllers
                 .ToList();
 
             return View("~/Views/Policyholder/MyClaims.cshtml", myClaims);
+        }
+
+        [HttpPost]
+        public IActionResult UpdateClaimStatus(int claimId, string status)
+        {
+            var claim = _context.Claims.FirstOrDefault(c => c.ClaimId == claimId);
+            if (claim == null) return NotFound();
+
+            claim.ClaimStatus = status;
+            _context.Claims.Update(claim);
+
+            if (status == "Approved")
+            {
+                var applied = _context.AppliedPolicies.FirstOrDefault(ap => ap.PolicyId == claim.PolicyId && ap.UserId == claim.UserId);
+                if (applied != null)
+                {
+                    applied.EnrollementStatus = "Claimed"; // allow re-enrollment
+                    _context.AppliedPolicies.Update(applied);
+                }
+            }
+
+            _context.SaveChanges();
+            return Ok();
         }
     }
 }

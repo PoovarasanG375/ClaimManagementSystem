@@ -35,8 +35,8 @@
                         </div>
                         <div class="details mt-3">
                             <span>Policy Number <span class="float-end text-muted">@policy.PolicyNumber</span></span><br>
-                            <span>Coverage <span class="float-end currency">@policy.CoverageAmount</span></span><br>
-                            <span>Premium <span class="float-end currency">@policy.AnnualPremium</span></span><br>
+                            <span>Coverage <span class="float-end currency">@policy.CoverageAmount?.ToString("C0")</span></span><br>
+                            <span>Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span><br>
                             <span>Enrolled <span class="float-end text-muted">@policy.CreatedDate</span></span>
                         </div>
                         <button class="btn btn-enroll mt-4" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
