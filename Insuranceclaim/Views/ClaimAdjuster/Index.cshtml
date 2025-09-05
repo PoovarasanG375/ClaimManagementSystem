@@ -55,7 +55,7 @@
 
         .claim-details strong {
             display: inline-block;
-            width: 150px; /* Adjust as needed for alignment */
+            width: 150px;
         }
     </style>
 </head>
@@ -86,33 +86,15 @@
                                     </div>
                                     <div class="card-body claim-card-body">
                                         <div class="claim-details">
-                                            <p><strong>Policy ID:</strong> @Html.DisplayFor(modelItem => item.PolicyId)</p>
+                                            <p><strong>Policy Holder:</strong> @Html.DisplayFor(modelItem => item.User.Username)</p>
                                             <p><strong>Policy Name:</strong> @Html.DisplayFor(modelItem => item.Policy.PolicyName)</p>
-                                            <p><strong>Policy Holder Name:</strong> @Html.DisplayFor(modelItem => item.User.Username)</p>
                                             <p><strong>Claim Amount:</strong> @Html.DisplayFor(modelItem => item.ClaimAmount)</p>
                                             <p><strong>Claim Date:</strong> @Html.DisplayFor(modelItem => item.ClaimDate)</p>
                                             <p><strong>Claim Status:</strong> @Html.DisplayFor(modelItem => item.ClaimStatus)</p>
-                                            <p><strong>Documents:</strong></p>
-                                            @if (item.Documents != null && item.Documents.Any())
-                                            {
-                                                <ul>
-                                                    @foreach (var doc in item.Documents)
-                                                    {
-                                                        <li>
-                                                            <a href="@doc.DocumentPath" target="_blank">@doc.DocumentName</a>
-                                                        </li>
-                                                    }
-                                                </ul>
-                                            }
-                                            else
-                                            {
-                                                <span>No documents attached.</span>
-                                            }
                                         </div>
                                     </div>
                                     <div class="card-footer d-flex justify-content-end">
-                                        <a asp-action="Edit" asp-route-id="@item.ClaimId" class="btn btn-primary me-2">Edit</a>
-                                        <a asp-action="Details" asp-route-id="@item.ClaimId" class="btn btn-info">Details</a>
+                                        <a asp-action="Details" asp-route-id="@item.ClaimId" class="btn btn-info">View Details</a>
                                     </div>
                                 </div>
                             </div>

@@ -27,8 +27,8 @@
         {
             foreach (var policy in Model)
             {
-                <div class="col-md-6 col-lg-4 mb-4">
-                    <div class="card-policy">
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card-policy h-100 d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-2">
                             <div class="policy-title">@policy.PolicyName</div>
                             <span class="badge bg-primary px-3 py-2 rounded-pill" style="font-size: 0.85rem;">@policy.PolicyStatus</span>
@@ -39,7 +39,7 @@
                             <span>Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span><br>
                             <span>Enrolled <span class="float-end text-muted">@policy.CreatedDate</span></span>
                         </div>
-                        <button class="btn btn-enroll mt-4" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
+                        <button class="btn btn-enroll mt-auto pt-3" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
                             <i class="fas fa-plus me-2"></i> Submit Claim
                         </button>
                     </div>

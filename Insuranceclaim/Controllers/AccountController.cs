@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using System.Security.Claims;
+using Claim = System.Security.Claims.Claim;
 
 namespace Insuranceclaim.Controllers
 {
@@ -28,7 +29,22 @@ namespace Insuranceclaim.Controllers
             var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password && u.Role == usertype);
             if (user != null)
             {
+                var claims = new List<Claim>
+{
+            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+     new Claim(ClaimTypes.Name, user.Username),
+     new Claim(ClaimTypes.Role, user.Role)
+};
 
+                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                var authProperties = new AuthenticationProperties
+                {
+                    IsPersistent = true, // Keep the user logged in across requests
+                    ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(30)
+                };
+
+                // Sign in the user, creating an authentication cookie
+                await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
                 // Redirect based on user type
                 switch (usertype.ToLower())
                 {
@@ -36,7 +52,7 @@ namespace Insuranceclaim.Controllers
                         return RedirectToAction("Index", "Admins");
                     case "agent":
                         return RedirectToAction("AgentHome", "AgentDashboard");
-                    case "claim-adjuster":
+                    case "claim adjuster":
                         return RedirectToAction("Index", "ClaimAdjuster");
                     case "policy holder":
                         return RedirectToAction("Dashboard", "Policyholder");

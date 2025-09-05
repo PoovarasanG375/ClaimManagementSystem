@@ -66,13 +66,13 @@
             <div class="card-header">
                 Claim Details
             </div>
-            <div class="card-body">
+             <div class="card-body">
                 <form asp-action="Edit">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <input type="hidden" asp-for="ClaimId" />
 
                     <div class="row">
-                        <div class="col-md-6">
+                       @* <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="PolicyId" class="form-label">Policy ID</label>
                                 <select asp-for="PolicyId" class="form-control" asp-items="ViewBag.PolicyId"></select>
@@ -95,20 +95,20 @@
                                 <input asp-for="ClaimDate" class="form-control" type="date" />
                                 <span asp-validation-for="ClaimDate" class="text-danger"></span>
                             </div>
-                        </div>
+                        </div> *@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="ClaimStatus" class="form-label"></label>
                                 <select asp-for="ClaimStatus" class="form-control">
                                     <option value="pending admin review">Pending Admin Review</option>
-                                    <option value="declined">Declined</option>
+                                    <option value="Rejected">Rejected</option>
                                 </select>
                                 <span asp-validation-for="ClaimStatus" class="text-danger"></span>
                             </div>
                         </div>
                     </div>
 
-                    <div class="row">
+@*                     <div class="row">
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="AdjusterId" class="form-label">Adjuster ID</label>
@@ -118,12 +118,12 @@
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
-                                <label asp-for="DescriptionofIncident" class="form-label"></label>
+                                <label asp-for="DescriptionofIncident" class="form-label" readonly></label>
 <textarea asp-for="DescriptionofIncident" class="form-control" rows="3"></textarea>
                                 <span asp-validation-for="DescriptionofIncident" class="text-danger"></span>
                             </div>
                         </div>
-                    </div>
+                    </div> *@
 
                     <div class="row">
                         <div class="col-md-6">
@@ -132,7 +132,7 @@
 <textarea asp-for="AdjusterNotes" class="form-control" rows="3"></textarea>
                                 <span asp-validation-for="AdjusterNotes" class="text-danger"></span>
                             </div>
-                        </div>
+                    @*     </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label asp-for="AdjusterApprovalDate" class="form-label"></label>
@@ -140,7 +140,7 @@
                                 <span asp-validation-for="AdjusterApprovalDate" class="text-danger"></span>
                             </div>
                         </div>
-                    </div>
+                    </div> *@
 
                     <div class="mb-3">
                         <label class="form-label">Documents</label>

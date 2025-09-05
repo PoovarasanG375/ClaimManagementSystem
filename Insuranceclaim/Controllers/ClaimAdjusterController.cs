@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Insuranceclaim.Models;
+using ClaimModel = Insuranceclaim.Models.Claim; // Namespace alias
 
 namespace Insuranceclaim.Controllers
 {
@@ -21,7 +21,10 @@ namespace Insuranceclaim.Controllers
         // GET: Claim
         public async Task<IActionResult> Index()
         {
-            var claimManagementSystemContext = _context.Claims.Include(c => c.Adjuster).Include(c => c.Policy);
+            var claimManagementSystemContext = _context.Claims
+                .Include(c => c.Adjuster)
+                .Include(c => c.Policy)
+                .Include(c => c.User);
             return View(await claimManagementSystemContext.ToListAsync());
         }
 
@@ -36,81 +39,77 @@ namespace Insuranceclaim.Controllers
             var claim = await _context.Claims
                 .Include(c => c.Adjuster)
                 .Include(c => c.Policy)
+                .Include(c => c.Documents)
+                .Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.ClaimId == id);
+
             if (claim == null)
             {
                 return NotFound();
             }
 
+            ViewData["IsClaimProcessed"] = !string.IsNullOrEmpty(claim.AdjusterNotes) &&
+                                           (claim.ClaimStatus == "Rejected" || claim.ClaimStatus == "pending admin review");
+
             return View(claim);
         }
 
-        // GET: Claim/Create
-        public IActionResult Create()
-        {
-            ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId");
-            ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId");
-            return View();
-        }
-
-        // POST: Claim/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: Claim/UpdateClaimDetails/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ClaimId,PolicyId,ClaimAmount,ClaimDate,ClaimStatus,AdjusterId,DescriptionOfClaim,AdjusterNotes,AdjusterApprovalDate,AdminNotes,AdminApprovalDate,FileName")] Claim claim)
+        public async Task<IActionResult> UpdateClaimDetails(int id, [Bind("ClaimId,AdjusterNotes,ClaimStatus")] ClaimModel updatedClaim)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(claim);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId", claim.AdjusterId);
-            ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId", claim.PolicyId);
-            return View(claim);
-        }
-
-        // GET: Claim/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
+            if (id != updatedClaim.ClaimId)
             {
                 return NotFound();
             }
 
-            var claim = await _context.Claims.FindAsync(id);
-            if (claim == null)
+            var claimToUpdate = await _context.Claims.FirstOrDefaultAsync(c => c.ClaimId == id);
+
+            if (claimToUpdate == null)
             {
                 return NotFound();
             }
-            ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId", claim.AdjusterId);
-            ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId", claim.PolicyId);
-            return View(claim);
-        }
 
-        // POST: Claim/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ClaimId,PolicyId,ClaimAmount,ClaimDate,ClaimStatus,AdjusterId,DescriptionOfClaim,AdjusterNotes,AdjusterApprovalDate,AdminNotes,AdminApprovalDate,FileName")] Claim claim)
-        {
-            if (id != claim.ClaimId)
+            // Check if the claim has already been processed by an adjuster
+            if (claimToUpdate.AdjusterId.HasValue)
             {
-                return NotFound();
+                TempData["ErrorMessage"] = "This claim has already been processed.";
+                return RedirectToAction(nameof(Details), new { id = claimToUpdate.ClaimId });
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(claim);
+                    // Update only the specific fields
+                    claimToUpdate.AdjusterNotes = updatedClaim.AdjusterNotes;
+                    claimToUpdate.ClaimStatus = updatedClaim.ClaimStatus;
+
+                    // Get the logged-in adjuster's user ID from the claims
+                    var loggedInUserIdString = User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier);
+                    if (int.TryParse(loggedInUserIdString, out int loggedInUserId))
+                    {
+                        claimToUpdate.AdjusterId = loggedInUserId;
+                    }
+                    else
+                    {
+                        // Handle the case where the user ID is not available or not an integer
+                        TempData["ErrorMessage"] = "Unable to identify the logged-in user.";
+                        return RedirectToAction(nameof(Details), new { id = claimToUpdate.ClaimId });
+                    }
+
+                    claimToUpdate.AdjusterApprovalDate = DateTime.Today;
+
+                    _context.Update(claimToUpdate);
                     await _context.SaveChangesAsync();
+
+                    TempData["SuccessMessage"] = "Changes saved successfully!";
+                    return RedirectToAction(nameof(Details), new { id = claimToUpdate.ClaimId });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ClaimExists(claim.ClaimId))
+                    if (!ClaimExists(updatedClaim.ClaimId))
                     {
                         return NotFound();
                     }
@@ -119,46 +118,18 @@ namespace Insuranceclaim.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
-            }
-            ViewData["AdjusterId"] = new SelectList(_context.Users, "UserId", "UserId", claim.AdjusterId);
-            ViewData["PolicyId"] = new SelectList(_context.Policies, "PolicyId", "PolicyId", claim.PolicyId);
-            return View(claim);
-        }
-
-        // GET: Claim/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
             }
 
             var claim = await _context.Claims
                 .Include(c => c.Adjuster)
                 .Include(c => c.Policy)
+                .Include(c => c.Documents)
+                .Include(c => c.User)
                 .FirstOrDefaultAsync(m => m.ClaimId == id);
-            if (claim == null)
-            {
-                return NotFound();
-            }
 
-            return View(claim);
-        }
+            ViewData["IsClaimProcessed"] = false;
 
-        // POST: Claim/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            var claim = await _context.Claims.FindAsync(id);
-            if (claim != null)
-            {
-                _context.Claims.Remove(claim);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            return View("Details", claim);
         }
 
         private bool ClaimExists(int id)
