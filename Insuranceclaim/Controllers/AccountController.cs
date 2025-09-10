@@ -26,7 +26,7 @@ namespace Insuranceclaim.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(string usertype, string username, string password)
         {
-            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password && u.Role == usertype);
+            var user = _context.Users.FirstOrDefault(u => u.Username == username && u.Password == password);
             if (user != null)
             {
                 var claims = new List<Claim>
@@ -46,12 +46,12 @@ namespace Insuranceclaim.Controllers
                 // Sign in the user, creating an authentication cookie
                 await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(claimsIdentity), authProperties);
                 // Redirect based on user type
-                switch (usertype.ToLower())
+                switch (user.Role.ToLower())
                 {
                     case "admin":
                         return RedirectToAction("Index", "Admins");
                     case "agent":
-                        return RedirectToAction("AgentHome", "AgentDashboard");
+                        return RedirectToAction("Index", "Agents");
                     case "claim adjuster":
                         return RedirectToAction("Index", "ClaimAdjuster");
                     case "policy holder":
@@ -63,7 +63,7 @@ namespace Insuranceclaim.Controllers
             }
             else
             {
-                ViewBag.ErrorMessage = "Invalid username, password, or user type.";
+                ViewBag.ErrorMessage = "Invalid username, password.";
                 return View();
             }
         }
@@ -99,7 +99,7 @@ namespace Insuranceclaim.Controllers
             {
                 Username = username,
                 Password = password,
-                Role = userType,
+                Role = "POLICY HOLDER",
                 Email = Email
             };
             _context.Users.Add(user);

@@ -1,6 +1,6 @@
 ﻿@model List<Insuranceclaim.Models.Claim>
 @{
-    Layout = "~/Views/Shared/_PolicyholderLayout.cshtml";
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
     ViewData["Title"] = "My Claims";
     ViewBag.Page = "MyClaims";
 }
@@ -40,7 +40,8 @@
                                 {
                                     statusBadgeClass = "bg-warning";
                                 }
-                                else if (claim.ClaimStatus == "pending admin review"){
+                                else if (claim.ClaimStatus == "pending admin review")
+                                {
 
                                     statusBadgeClass = "custom-pending-admin-review";
                                 }

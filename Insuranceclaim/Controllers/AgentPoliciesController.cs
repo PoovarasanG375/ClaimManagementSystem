@@ -1,4 +1,4 @@
-using Insuranceclaim.Models;
+﻿using Insuranceclaim.Models;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using Claim = System.Security.Claims.Claim;
@@ -8,11 +8,11 @@ using System.IO;
 
 namespace Insuranceclaim.Controllers
 {
-    public class PolicyholderController : Controller
+    public class AgentPoliciesController : Controller
     {
         private readonly ClaimManagementSystemContext _context;
 
-        public PolicyholderController(ClaimManagementSystemContext context)
+        public AgentPoliciesController(ClaimManagementSystemContext context)
         {
             _context = context;
         }
@@ -23,19 +23,28 @@ namespace Insuranceclaim.Controllers
         }
 
         [HttpGet]
-        public IActionResult AvailablePolicies()
+        public IActionResult AvailablePolicies(int? userId)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+            // If a userId is provided (from Agents->Details), use it; otherwise fall back to current user's id
+            int targetUserId;
+            if (userId.HasValue)
             {
-                return RedirectToAction("Login", "Account");
+                targetUserId = userId.Value;
+            }
+            else
+            {
+                if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out targetUserId))
+                {
+                    return RedirectToAction("Login", "Account");
+                }
             }
 
             // Get all policies
             var allPolicies = _context.Policies.ToList();
 
-            // Get applied policies for the user
+            // Get applied policies for the target user
             var appliedPolicies = _context.AppliedPolicies
-                .Where(ap => ap.UserId == userId)
+                .Where(ap => ap.UserId == targetUserId)
                 .ToList();
 
             // Determine policy status based on AppliedPolicies.EnrollementStatus
@@ -68,20 +77,20 @@ namespace Insuranceclaim.Controllers
                 }
             }
 
-            return View(allPolicies);
+            // Pass the target user id to the view via ViewBag so client-side JS can include it in requests
+            ViewBag.TargetUserId = targetUserId;
+
+            return View("~/Views/Agent/AgentPolicies.cshtml", allPolicies);
         }
 
         [HttpGet]
-        public IActionResult MyPolicies()
+        public IActionResult MyPolicies(int? userId)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            int targetUserId = userId ?? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             // Get applied policies for the user
             var appliedPolicies = _context.AppliedPolicies
-                .Where(ap => ap.UserId == userId)
+                .Where(ap => ap.UserId == targetUserId)
                 .ToList();
 
             // Join applied policies with policy details and show Remainingamount as CoverageAmount
@@ -110,46 +119,49 @@ namespace Insuranceclaim.Controllers
             if (TempData["SuccessMessage"] != null)
                 ViewBag.SuccessMessage = TempData["SuccessMessage"];
 
-            return View(enrolledPolicies);
+            ViewBag.TargetUserId = targetUserId;
+            return View("~/Views/Agent/AgentMyPolicies.cshtml", enrolledPolicies);
         }
 
         [HttpGet]
-        public IActionResult MyClaims()
+        public IActionResult MyClaims(int? userId)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            int targetUserId = userId ?? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             var myClaims = _context.Claims
                 .Include(c => c.Policy)
-                .Where(c => c.UserId == userId)
+                .Where(c => c.UserId == targetUserId)
                 .ToList();
 
-            return View("~/Views/Policyholder/MyClaims.cshtml", myClaims);
+            ViewBag.TargetUserId = targetUserId;
+            return View("~/Views/Agent/AgentClaims.cshtml", myClaims);
         }
 
         [HttpGet]
-        public IActionResult Support()
+        public IActionResult Support(int? userId)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            int targetUserId = userId ?? int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
 
             // Load support tickets for current user
             var tickets = _context.SupportTickets
-                .Where(s => s.UserId == userId)
+                .Where(s => s.UserId == targetUserId)
                 .OrderByDescending(s => s.CreatedDate)
                 .ToList();
 
-            return View(tickets);
+            ViewBag.TargetUserId = targetUserId;
+            return View("~/Views/Agent/AgentSupport.cshtml", tickets);
         }
 
         [HttpPost]
-        public IActionResult EnrollPolicy(int policyId)
+        public IActionResult EnrollPolicy(int policyId, int? targetUserId)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+            // Determine which user the enrollment is for: provided targetUserId (agent acting for policyholder) or current user
+            int userId;
+            if (targetUserId.HasValue)
+            {
+                userId = targetUserId.Value;
+            }
+            else if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out userId))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -198,9 +210,14 @@ namespace Insuranceclaim.Controllers
         }
 
         [HttpPost]
-        public IActionResult SubmitClaim(int policyId, decimal claimAmount, DateOnly incidentDate, string incidentDescription, IFormFile claimFile)
+        public IActionResult SubmitClaim(int policyId, decimal claimAmount, DateOnly incidentDate, string incidentDescription, IFormFile claimFile, int? targetUserId)
         {
-            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+            int userId;
+            if (targetUserId.HasValue)
+            {
+                userId = targetUserId.Value;
+            }
+            else if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out userId))
             {
                 return RedirectToAction("Login", "Account");
             }
@@ -209,21 +226,21 @@ namespace Insuranceclaim.Controllers
             if (policy == null)
             {
                 TempData["ErrorMessage"] = "Policy not found.";
-                return RedirectToAction("MyPolicies", "Policyholder");
+                return RedirectToAction("MyPolicies", "AgentPolicies");
             }
 
             var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
             if (appliedPolicy == null)
             {
                 TempData["ErrorMessage"] = "No enrollment found for this policy.";
-                return RedirectToAction("MyPolicies", "Policyholder");
+                return RedirectToAction("MyPolicies", "AgentPolicies");
             }
 
             // Minimum claim amount check
             if (claimAmount < 5000m)
             {
                 TempData["ErrorMessage"] = "Minimum claim amount is 5,000.";
-                return RedirectToAction("MyPolicies", "Policyholder");
+                return RedirectToAction("MyPolicies", "AgentPolicies");
             }
 
             // Ensure applied policy has remaining coverage
@@ -231,13 +248,13 @@ namespace Insuranceclaim.Controllers
             if (remainingCoverage <= 0)
             {
                 TempData["ErrorMessage"] = "No remaining coverage available for this policy.";
-                return RedirectToAction("MyPolicies", "Policyholder");
+                return RedirectToAction("MyPolicies", "AgentPolicies");
             }
 
             if (claimAmount > remainingCoverage)
             {
                 TempData["ErrorMessage"] = "Coverage limit exceeded.";
-                return RedirectToAction("MyPolicies", "Policyholder");
+                return RedirectToAction("MyPolicies", "AgentPolicies");
             }
 
             // Save claim
@@ -286,7 +303,8 @@ namespace Insuranceclaim.Controllers
             _context.SaveChanges();
 
             TempData["SuccessMessage"] = "Claim submitted successfully.";
-            return RedirectToAction("MyClaims", "Policyholder");
+            return RedirectToAction("MyClaims", "AgentPolicies", new { userId = userId });
+            //return RedirectToAction("AgentClaims");
         }
 
         [HttpPost]
@@ -314,24 +332,32 @@ namespace Insuranceclaim.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateSupportTicket([Bind("IssueDescription")] SupportTicket supportTicket)
+        public IActionResult CreateSupportTicket([Bind("IssueDescription")] SupportTicket supportTicket, int? targetUserId)
         {
             if (!ModelState.IsValid)
             {
                 // If model state is invalid, redirect back to support page
                 TempData["ErrorMessage"] = "Please provide a valid issue description.";
-                return RedirectToAction("Support", "Policyholder");
+                return RedirectToAction("Support", new { userId = targetUserId });
             }
 
-            // Get the current user's ID
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            // Determine the user id this ticket is for
+            int userId;
+            if (targetUserId.HasValue)
             {
-                // If user is not authenticated or ID is not a valid integer, redirect to login
-                return RedirectToAction("Login", "Account");
+                userId = targetUserId.Value;
+            }
+            else
+            {
+                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out userId))
+                {
+                    // If user is not authenticated or ID is not a valid integer, redirect to login
+                    return RedirectToAction("Login", "Account");
+                }
             }
 
-            // Set the UserId from the authenticated user
+            // Set the UserId from the authenticated user or target
             supportTicket.UserId = userId;
 
             // Set default status and creation date
@@ -344,7 +370,7 @@ namespace Insuranceclaim.Controllers
             TempData["SuccessMessage"] = "Support ticket submitted successfully!";
 
             // Redirect to the Support GET that returns the Policyholder support view with the updated tickets
-            return RedirectToAction("Support", "Policyholder");
+            return RedirectToAction("Support", new { userId = userId });
         }
     }
 }

@@ -46,6 +46,10 @@ namespace Insuranceclaim.Controllers
 
             var users = _context.Users.AsQueryable();
 
+            // Exclude Admin users from the initial query
+
+            users = users.Where(u => u.Role != "Admin");
+
             // Apply the filter if a role is selected
 
             if (!string.IsNullOrEmpty(roleFilter))
@@ -101,8 +105,6 @@ namespace Insuranceclaim.Controllers
         }
 
         // POST: AdminUsers/Create
-
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
 
         [HttpPost]
 
@@ -220,6 +222,58 @@ namespace Insuranceclaim.Controllers
 
         }
 
+        // POST: AdminUsers/Delete/5
+
+        //[HttpPost]
+
+        //[ValidateAntiForgeryToken]
+
+        //public async Task<IActionResult> Delete(int id)
+
+        //{
+
+        //    try
+
+        //    {
+
+        //        var user = await _context.Users.FindAsync(id);
+
+        //        if (user != null)
+
+        //        {
+
+        //            _context.Users.Remove(user);
+
+        //            await _context.SaveChangesAsync();
+
+        //            // This returns an HTTP 200 OK status, which is correct for AJAX
+
+        //            // and will prevent a full page reload.
+
+        //            return Ok();
+
+        //        }
+
+        //        return NotFound();
+
+        //    }
+
+        //    catch (Exception ex)
+
+        //    {
+
+        //        // Log the exception (e.g., using a logging framework)
+
+        //        Console.WriteLine($"Error deleting user {id}: {ex.Message}");
+
+        //        // Return a bad request status with a specific error message
+
+        //        return BadRequest("An error occurred while deleting the user. " + ex.Message);
+
+        //    }
+
+        //}
+
         // GET: AdminUsers/Delete/5
 
         public async Task<IActionResult> Delete(int? id)
@@ -234,9 +288,7 @@ namespace Insuranceclaim.Controllers
 
             }
 
-            var user = await _context.Users
-
-                .FirstOrDefaultAsync(m => m.UserId == id);
+            var user = await _context.Users.FirstOrDefaultAsync(m => m.UserId == id);
 
             if (user == null)
 
@@ -268,9 +320,9 @@ namespace Insuranceclaim.Controllers
 
                 _context.Users.Remove(user);
 
-            }
+                await _context.SaveChangesAsync();
 
-            await _context.SaveChangesAsync();
+            }
 
             return RedirectToAction(nameof(Index));
 

@@ -4,6 +4,8 @@
 
     ViewData["Title"] = "Create";
 
+    Layout = null;
+
 }
 <h1>Create</h1>
 <h4>User</h4>
@@ -45,7 +47,9 @@
 @section Scripts {
 
     @{
+
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
+
     }
 
 }

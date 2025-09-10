@@ -40,9 +40,17 @@ namespace Insuranceclaim.Controllers
 
         {
 
-            var claimManagementSystemContext = _context.Claims.Include(c => c.Adjuster).Include(c => c.Policy);
+            var claims = _context.Claims
 
-            return View("~/Views/Admin/AdminClaims/Index.cshtml", await claimManagementSystemContext.ToListAsync());
+                .Include(c => c.Adjuster)
+
+                .Include(c => c.Policy)
+
+                .Include(c => c.User)
+
+                .Where(c => c.ClaimStatus == "Pending Admin Review" || c.ClaimStatus == "Approved" || c.ClaimStatus == "Rejected");
+
+            return View("~/Views/Admin/AdminClaims/Index.cshtml", await claims.ToListAsync());
 
         }
 
@@ -95,10 +103,6 @@ namespace Insuranceclaim.Controllers
         }
 
         // POST: AdminClaim/Create
-
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 
         [HttpPost]
 
@@ -161,10 +165,6 @@ namespace Insuranceclaim.Controllers
         }
 
         // POST: AdminClaim/Edit/5
-
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
 
         [HttpPost]
 
@@ -298,7 +298,140 @@ namespace Insuranceclaim.Controllers
 
         }
 
+        [HttpGet]
+
+        public async Task<IActionResult> GetClaimDetails(int id)
+
+        {
+
+            var claim = await _context.Claims
+
+                .Include(c => c.Policy)
+
+                    .ThenInclude(p => p.Policyholder)
+
+                .Include(c => c.Adjuster)
+
+                .FirstOrDefaultAsync(c => c.ClaimId == id);
+
+            if (claim == null)
+
+            {
+
+                return NotFound();
+
+            }
+
+            return Json(new
+
+            {
+
+                claimId = claim.ClaimId,
+
+                policyholder = claim.Policy?.Policyholder?.Username,
+
+                policyNumber = claim.Policy?.PolicyNumber,
+
+                claimAmount = claim.ClaimAmount,
+
+                coverageAmount = claim.Policy?.CoverageAmount,
+
+                submittedDate = claim.ClaimDate.HasValue ? claim.ClaimDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+
+                adjusterName = claim.Adjuster?.Username,
+
+                descriptionOfIncident = claim.DescriptionofIncident,
+
+                adjusterNotes = claim.AdjusterNotes,
+
+                currentStatus = claim.ClaimStatus,
+
+                adminNotes = claim.AdminNotes
+
+            });
+
+        }
+
+        [HttpPost]
+
+        [ValidateAntiForgeryToken]
+
+        public async Task<IActionResult> UpdateClaimDetails([FromBody] ClaimUpdateModel model)
+
+        {
+
+            if (model == null)
+
+            {
+
+                return BadRequest();
+
+            }
+
+            var claim = await _context.Claims.FirstOrDefaultAsync(c => c.ClaimId == model.ClaimId);
+
+            if (claim == null)
+
+            {
+
+                return NotFound();
+
+            }
+
+            claim.ClaimStatus = model.Status;
+
+            claim.AdminNotes = model.AdminNotes;
+
+            claim.AdminApprovalDate = DateTime.Now;
+
+            try
+
+            {
+
+                _context.Update(claim);
+
+                await _context.SaveChangesAsync();
+
+            }
+
+            catch (DbUpdateConcurrencyException)
+
+            {
+
+                if (!ClaimExists(claim.ClaimId))
+
+                {
+
+                    return NotFound();
+
+                }
+
+                else
+
+                {
+
+                    throw;
+
+                }
+
+            }
+
+            return Ok(new { success = true, message = "Claim updated successfully." });
+
+        }
+
+        public class ClaimUpdateModel
+
+        {
+
+            public int ClaimId { get; set; }
+
+            public string Status { get; set; }
+
+            public string AdminNotes { get; set; }
+
+        }
+
     }
 
 }
-

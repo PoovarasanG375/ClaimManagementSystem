@@ -1,6 +1,6 @@
 ﻿@model List<Insuranceclaim.Models.Policy>
 @{
-    Layout = "~/Views/Shared/_PolicyholderLayout.cshtml";
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
     ViewData["Title"] = "Available Policies";
     ViewBag.Page = "AvailablePolicies";
 }
@@ -307,6 +307,9 @@
             const successContainer = $('#paymentSuccessContainer');
             const finalPayBtn = $('#final-pay-btn');
 
+            // Grab the target user id passed from controller
+            const targetUserId = '@(ViewBag.TargetUserId ?? 0)';
+
             // Handle modal open
             $('#policy-cards-container').on('click', '.btn-enroll', function() {
                 const policyTitle = $(this).data('policy-title');
@@ -351,7 +354,7 @@
                 finalPayBtn.show().text(`Pay ${$('#modal-premium-amount').text()}`);
             });
 
-            // The corrected part: Use AJAX to call the controller
+            // The corrected part: Use AJAX to call the controller, including targetUserId when present
             finalPayBtn.on('click', function() {
                 const selectedMethod = $('.payment-option.active').data('method');
                 const policyId = modal.data('policy-id');
@@ -370,9 +373,9 @@
 
                 // Now, send an AJAX request to your controller to actually enroll the policy
                 $.ajax({
-                    url: '@Url.Action("EnrollPolicy", "Policyholder")',
+                    url: '@Url.Action("EnrollPolicy", "AgentPolicies")',
                     type: 'POST',
-                    data: { policyId: policyId },
+                    data: { policyId: policyId, targetUserId: targetUserId },
                     success: function(response) {
                         console.log("Enrollment successful on the server.");
                         // The modal's 'hidden.bs.modal' event will handle the reload

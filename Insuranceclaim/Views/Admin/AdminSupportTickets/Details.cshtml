@@ -20,7 +20,7 @@
 
 <style>
 
-    /* New styles for the Details page */
+    /* Final Styles for the single-card Details page */
 
     :root {
         --primary-blue: #3498db;
@@ -31,6 +31,7 @@
     }
 
     body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
         background-color: var(--background-light);
     }
 
@@ -44,7 +45,6 @@
         border-radius: 8px;
         box-shadow: var(--card-shadow);
         padding: 2rem;
-        margin-bottom: 2rem;
         transition: transform 0.3s ease-in-out;
     }
 
@@ -52,13 +52,18 @@
             transform: translateY(-3px);
         }
 
-        .details-card h4 {
+        .details-card h3 {
             color: var(--text-dark);
             font-weight: 600;
             border-bottom: 1px solid #ddd;
             padding-bottom: 0.5rem;
+            margin-top: 2rem;
             margin-bottom: 1.5rem;
         }
+
+            .details-card h3:first-of-type {
+                margin-top: 0;
+            }
 
     .status-badge {
         padding: 0.4rem 0.8rem;
@@ -111,12 +116,12 @@
 
 <div class="container mt-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Ticket #@Model.TicketId</h2>
+        <h2>Ticket</h2>
         <a asp-action="Index" class="btn btn-secondary">Back to List</a>
     </div>
 
     <div class="details-card">
-        <h4>Ticket Information</h4>
+        <h3>Ticket Information</h3>
         <div class="row">
             <div class="col-md-6">
                 <p><strong>Customer:</strong> @Model.User?.Username</p>
@@ -133,23 +138,43 @@
                 </p>
             </div>
         </div>
-    </div>
 
-    <div class="details-card">
-        <h4>Admin Response</h4>
-        <p>@(!string.IsNullOrEmpty(Model.Response) ? Model.Response : "No response yet.")</p>
-    </div>
+        <h3>Admin Response & Action</h3>
 
-    <div class="details-card">
-        <h4>Admin Actions</h4>
-        <form asp-action="UpdateTicket" method="post">
-            <input type="hidden" name="ticketId" value="@Model.TicketId" />
+        @{
 
-            <div class="mb-3">
-                <label for="responseMessage" class="form-label">Add/Update Response</label>
-<textarea name="responseMessage" class="form-control" rows="4">@Model.Response</textarea>
+            var hasResponse = !string.IsNullOrEmpty(Model.Response);
+
+        }
+
+        @if (hasResponse)
+
+        {
+            <div class="alert alert-info" role="alert">
+
+                This ticket has been resolved. No further action is required.
             </div>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-        </form>
+            <p><strong>Response Provided:</strong></p>
+            <p>@Model.Response</p>
+
+        }
+
+        else
+
+        {
+            <form asp-action="UpdateTicket" method="post">
+                <input type="hidden" name="ticketId" value="@Model.TicketId" />
+
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label for="responseMessage" class="form-label">Add Response</label>
+    <textarea name="responseMessage" class="form-control" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+
+        }
     </div>
 </div>
+

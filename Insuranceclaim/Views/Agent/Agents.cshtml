@@ -1,0 +1,209 @@
+﻿@model IEnumerable<Insuranceclaim.Models.User>
+
+@{
+    ViewData["Title"] = "PolicyHolders Dashboard";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Insuranceclaim</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .navbar {
+            background-color: #488AFB;
+        }
+
+        .navbar-brand, .nav-link, .logout-btn {
+            color: white !important;
+            font-weight: 500;
+        }
+
+        .logout-btn {
+            text-decoration: none;
+        }
+
+        footer {
+            background-color: #f1f1f1;
+            padding: 15px;
+            text-align: center;
+            margin-top: 30px;
+            color: #555;
+        }
+
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Agent Portal</a>
+            <a href="@Url.Action("Index", "Home")" class="logout-btn ms-auto">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1>PolicyHolders</h1>
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addPolicyholderModal">
+                <i class="fas fa-plus"></i> Add New Policyholder
+            </button>
+        </div>
+
+        <table class="table table-striped table-bordered shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="policyholderTableBody">
+                @foreach (var item in Model)
+                {
+                    <tr data-user-id="@item.UserId">
+                        <td>@Html.DisplayFor(modelItem => item.Username)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                        <td>
+                            <a asp-controller="Agents" asp-action="Details" asp-route-id="@item.UserId">Details</a> |
+                            <a href="#" class="btn-delete" data-bs-toggle="modal" data-bs-target="#deletePolicyholderModal" data-user-id="@item.UserId">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="modal fade" id="addPolicyholderModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Policyholder</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="addPolicyholderForm" asp-controller="Agents" asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" name="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" name="Email" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Add Policyholder</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="deletePolicyholderModal" tabindex="-1" aria-labelledby="deletePolicyholderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deletePolicyholderModalLabel">Confirm Deletion</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this policyholder? This action cannot be undone.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    @* <footer>
+        <p>&copy; 2025 The Healthy Mind. All rights reserved.</p>
+    </footer> *@
+    <script>
+        $(document).ready(function () {
+            // Variable to store the ID of the policyholder to be deleted
+            let userIdToDelete = null;
+
+            // Handle the click on the "Delete" link
+            $('#policyholderTableBody').on('click', '.btn-delete', function () {
+                userIdToDelete = $(this).data('user-id');
+            });
+
+            // Handle the click on the "Delete" button inside the modal
+            $('#confirmDeleteBtn').on('click', function () {
+                if (userIdToDelete !== null) {
+                    $.ajax({
+                        type: "POST",
+                        url: '@Url.Action("Delete", "Agents")',
+                        data: { id: userIdToDelete },
+                        success: function (response) {
+                            if (response.success) {
+                                // Find and remove the row from the table
+                                $('tr[data-user-id="' + userIdToDelete + '"]').remove();
+                                $('#deletePolicyholderModal').modal('hide');
+                            } else {
+                                alert(response.message || "An error occurred during deletion.");
+                            }
+                        },
+                        error: function () {
+                            alert("Could not contact the server.");
+                        }
+                    });
+                }
+            });
+
+            // AJAX for adding a new policyholder
+            $('#addPolicyholderForm').on('submit', function (e) {
+                e.preventDefault();
+                var form = $(this);
+
+                $.ajax({
+                    type: "POST",
+                    url: form.attr('action'),
+                    data: form.serialize(),
+                    success: function (response) {
+                        console.log("Success response received:", response);
+                        if (response.success) {
+                            $('#addPolicyholderModal').modal('hide');
+                            form[0].reset();
+
+                            var newRow = '<tr data-user-id="' + response.userId + '">' +
+                                '<td>' + response.username + '</td>' +
+                                '<td>' + response.email + '</td>' +
+                                '<td>' +
+                                '<a href="/Agents/Details/' + response.userId + '">Details</a> | ' +
+                                '<a href="#" class="btn-delete" data-bs-toggle="modal" data-bs-target="#deletePolicyholderModal" data-user-id="' + response.userId + '">Delete</a>' +
+                                '</td>' +
+                                '</tr>';
+
+                            $('#policyholderTableBody').append(newRow);
+                        } else {
+                            alert(response.message || "An error occurred.");
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX Error:", status, error);
+                        alert("Could not contact the server.");
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,314 +1,55 @@
-﻿using System;
+﻿using Insuranceclaim.Models;
 
-using System.Collections.Generic;
+using Microsoft.AspNetCore.Mvc;
 
 using System.Linq;
 
 using System.Threading.Tasks;
 
-using Microsoft.AspNetCore.Mvc;
-
-using Microsoft.AspNetCore.Mvc.Rendering;
-
-using Microsoft.EntityFrameworkCore;
-
-using Insuranceclaim.Models;
-
-namespace Insuranceclaim.Controllers
+public class AdminsController : Controller
 
 {
 
-    [Route("Admin/Admins/[action]")]
+    private readonly ClaimManagementSystemContext _context;
 
-    public class AdminsController : Controller
+    public AdminsController(ClaimManagementSystemContext context)
 
     {
 
-        private readonly ClaimManagementSystemContext _context;
+        _context = context;
 
-        public AdminsController(ClaimManagementSystemContext context)
+    }
 
-        {
+    public async Task<IActionResult> Index()
 
-            _context = context;
+    {
 
-        }
+        // Fetch data from the database
 
-        // GET: Admins
+        var totalPolicies = _context.Policies.Count();
 
-        public async Task<IActionResult> Index()
+        // Corrected line to count claims based on the 'Pending_Admin_Review' status
 
-        {
+        var pendingClaims = _context.Claims.Count(c => c.ClaimStatus == "pending admin review");
 
-            // Fetch total counts for the dashboard
+        // Corrected line: Count all users where UserRole is NOT "Admin"
 
-            ViewBag.TotalPolicies = await _context.Policies.CountAsync();
+        var activeUsers = _context.Users.Count(u => u.Role != "Admin");
 
-            ViewBag.TotalUsers = await _context.Users.CountAsync();
+        var openTickets = _context.SupportTickets.Count(t => t.TicketStatus == "Open");
 
-            ViewBag.TotalTickets = await _context.SupportTickets.CountAsync();
+        // Pass the data to the view using ViewBag
 
-            ViewBag.TotalClaims = await _context.Claims.CountAsync();
+        ViewBag.TotalPolicies = totalPolicies;
 
-            // Fetch recent activity to display on the dashboard
+        ViewBag.PendingClaims = pendingClaims;
 
-            ViewBag.RecentPolicies = await _context.Policies
+        ViewBag.ActiveUsers = activeUsers;
 
-                                                    .OrderByDescending(p => p.CreatedDate)
+        ViewBag.OpenTickets = openTickets;
 
-                                                    .Take(5)
-
-                                                    .ToListAsync();
-
-            ViewBag.RecentClaims = await _context.Claims
-
-                                                .OrderByDescending(c => c.ClaimDate)
-
-                                                .Take(5)
-
-                                                .ToListAsync();
-
-            ViewBag.RecentTickets = await _context.SupportTickets
-
-                                                  .OrderByDescending(t => t.CreatedDate)
-
-                                                  .Take(5)
-
-                                                  .ToListAsync();
-
-            return View("~/Views/Admin/Admins/Index.cshtml");
-
-        }
-
-        // GET: Admins/Details/5
-
-        public async Task<IActionResult> Details(int? id)
-
-        {
-
-            if (id == null)
-
-            {
-
-                return NotFound();
-
-            }
-
-            var user = await _context.Users
-
-                .FirstOrDefaultAsync(m => m.UserId == id);
-
-            if (user == null)
-
-            {
-
-                return NotFound();
-
-            }
-
-            return View(user);
-
-        }
-
-        // GET: Admins/Create
-
-        public IActionResult Create()
-
-        {
-
-            return View();
-
-        }
-
-        // POST: Admins/Create
-
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
-        [HttpPost]
-
-        [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Create([Bind("UserId,Username,Password,Role,Email")] User user)
-
-        {
-
-            if (ModelState.IsValid)
-
-            {
-
-                _context.Add(user);
-
-                await _context.SaveChangesAsync();
-
-                return RedirectToAction(nameof(Index));
-
-            }
-
-            return View(user);
-
-        }
-
-        // GET: Admins/Edit/5
-
-        public async Task<IActionResult> Edit(int? id)
-
-        {
-
-            if (id == null)
-
-            {
-
-                return NotFound();
-
-            }
-
-            var user = await _context.Users.FindAsync(id);
-
-            if (user == null)
-
-            {
-
-                return NotFound();
-
-            }
-
-            return View(user);
-
-        }
-
-        // POST: Admins/Edit/5
-
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-
-        [HttpPost]
-
-        [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> Edit(int id, [Bind("UserId,Username,Password,Role,Email")] User user)
-
-        {
-
-            if (id != user.UserId)
-
-            {
-
-                return NotFound();
-
-            }
-
-            if (ModelState.IsValid)
-
-            {
-
-                try
-
-                {
-
-                    _context.Update(user);
-
-                    await _context.SaveChangesAsync();
-
-                }
-
-                catch (DbUpdateConcurrencyException)
-
-                {
-
-                    if (!UserExists(user.UserId))
-
-                    {
-
-                        return NotFound();
-
-                    }
-
-                    else
-
-                    {
-
-                        throw;
-
-                    }
-
-                }
-
-                return RedirectToAction(nameof(Index));
-
-            }
-
-            return View(user);
-
-        }
-
-        // GET: Admins/Delete/5
-
-        public async Task<IActionResult> Delete(int? id)
-
-        {
-
-            if (id == null)
-
-            {
-
-                return NotFound();
-
-            }
-
-            var user = await _context.Users
-
-                .FirstOrDefaultAsync(m => m.UserId == id);
-
-            if (user == null)
-
-            {
-
-                return NotFound();
-
-            }
-
-            return View(user);
-
-        }
-
-        // POST: Admins/Delete/5
-
-        [HttpPost, ActionName("Delete")]
-
-        [ValidateAntiForgeryToken]
-
-        public async Task<IActionResult> DeleteConfirmed(int id)
-
-        {
-
-            var user = await _context.Users.FindAsync(id);
-
-            if (user != null)
-
-            {
-
-                _context.Users.Remove(user);
-
-            }
-
-            await _context.SaveChangesAsync();
-
-            return RedirectToAction(nameof(Index));
-
-        }
-
-        private bool UserExists(int id)
-
-        {
-
-            return _context.Users.Any(e => e.UserId == id);
-
-        }
+        return View("~/Views/Admin/Admins/Index.cshtml");
 
     }
 
 }
-

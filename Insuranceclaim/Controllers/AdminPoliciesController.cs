@@ -38,7 +38,7 @@ namespace Insuranceclaim.Controllers
 
         {
 
-            var policies = from p in _context.Policies select p;
+            var policies = _context.Policies.AsQueryable();
 
             if (!string.IsNullOrEmpty(category) && category != "All")
 
@@ -56,13 +56,16 @@ namespace Insuranceclaim.Controllers
 
             }
 
-            ViewBag.Categories = await _context.Policies.Select(p => p.Category).Distinct().ToListAsync();
+            // Order the policies by CreatedDate in descending order to show the most recent first
 
-            ViewBag.Statuses = new List<string> { "Active", "Inactive", "Cancelled" };
+            var policyList = await policies.OrderByDescending(p => p.CreatedDate).ToListAsync();
+
+            ViewBag.Categories = await _context.Policies.Select(p => p.Category).Distinct().ToListAsync();
 
             ViewBag.SelectedCategory = category;
 
             ViewBag.SelectedStatus = status;
+
 
             return View("~/Views/Admin/AdminPolicies/Index.cshtml", await policies.ToListAsync());
 
@@ -74,13 +77,23 @@ namespace Insuranceclaim.Controllers
 
         [ValidateAntiForgeryToken]
 
-        public async Task<IActionResult> Create([Bind("PolicyNumber,Category,PolicyName,CoverageAmount,AnnualPremium,PolicyStatus,Description")] Policy policy)
+        public async Task<IActionResult> Create([Bind("Category,Type,PolicyName,CoverageAmount,AnnualPremium,Description")] Policy policy)
 
         {
 
             if (ModelState.IsValid)
 
             {
+
+                // Automatically generate a sequential policy number
+
+                policy.PolicyNumber = await GenerateNextPolicyNumber();
+
+                // Set the default status and creation date
+
+                policy.PolicyStatus = "ACTIVE";
+
+                // Fix for the CS0029 error
 
                 policy.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
 
@@ -221,6 +234,34 @@ namespace Insuranceclaim.Controllers
         {
 
             return _context.Policies.Any(e => e.PolicyId == id);
+
+        }
+
+        private async Task<string> GenerateNextPolicyNumber()
+
+        {
+
+            var lastPolicy = await _context.Policies.OrderByDescending(p => p.PolicyId).FirstOrDefaultAsync();
+
+            if (lastPolicy != null && !string.IsNullOrEmpty(lastPolicy.PolicyNumber))
+
+            {
+
+                string lastNumberStr = lastPolicy.PolicyNumber.Replace("POL", "");
+
+                if (int.TryParse(lastNumberStr, out int number))
+
+                {
+
+                    number++;
+
+                    return $"POL{number:D2}";
+
+                }
+
+            }
+
+            return "POL01";
 
         }
 

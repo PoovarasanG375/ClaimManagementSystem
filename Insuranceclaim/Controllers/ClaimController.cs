@@ -7,6 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Insuranceclaim.Controllers
 {
+
+    public class UpdateClaimStatusModel
+    {
+        public int claimId { get; set; }
+        public string status { get; set; }
+        public string adminNotes { get; set; }
+
+    }
     public class ClaimController : Controller
     {
         private readonly ClaimManagementSystemContext _context;
@@ -17,134 +25,57 @@ namespace Insuranceclaim.Controllers
         }
 
         [HttpPost]
-        public IActionResult SubmitClaim(int policyId, decimal claimAmount, DateOnly incidentDate, string incidentDescription, IFormFile claimFile)
+        [ValidateAntiForgeryToken]
+        public IActionResult UpdateClaimStatus([FromBody] UpdateClaimStatusModel model)
         {
-            if (!int.TryParse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier), out int userId))
+            // Check for null model and model validation
+            if (model == null || !ModelState.IsValid)
             {
-                return RedirectToAction("Login", "Account");
+                return BadRequest(new { success = false, message = "Invalid request data." });
             }
 
-            var policy = _context.Policies.FirstOrDefault(p => p.PolicyId == policyId);
-            if (policy == null)
+            try
             {
-                TempData["ErrorMessage"] = "Policy not found.";
-                return RedirectToAction("MyPolicies", "Policyholder");
-            }
+                // Fetch the claim from the database
+                var claim = _context.Claims.FirstOrDefault(c => c.ClaimId == model.claimId);
 
-            var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
-            if (appliedPolicy == null)
-            {
-                TempData["ErrorMessage"] = "No enrollment found for this policy.";
-                return RedirectToAction("MyPolicies", "Policyholder");
-            }
-
-            // Minimum claim amount check
-            if (claimAmount < 5000m)
-            {
-                TempData["ErrorMessage"] = "Minimum claim amount is ?5,000.";
-                return RedirectToAction("MyPolicies", "Policyholder");
-            }
-
-            // Ensure applied policy has remaining coverage
-            var remainingCoverage = appliedPolicy.Remainingamount ?? policy.CoverageAmount ?? 0m;
-            if (remainingCoverage <= 0)
-            {
-                TempData["ErrorMessage"] = "No remaining coverage available for this policy.";
-                return RedirectToAction("MyPolicies", "Policyholder");
-            }
-
-            if (claimAmount > remainingCoverage)
-            {
-                TempData["ErrorMessage"] = "Coverage limit exceeded.";
-                return RedirectToAction("MyPolicies", "Policyholder");
-            }
-
-            // Save claim
-            var claim = new Insuranceclaim.Models.Claim
-            {
-                PolicyId = policyId,
-                ClaimAmount = claimAmount,
-                ClaimDate = DateOnly.FromDateTime(DateTime.Now),
-                ClaimStatus = "Pending",
-                UserId = userId,
-                DescriptionofIncident = incidentDescription
-            };
-            _context.Claims.Add(claim);
-            _context.SaveChanges();
-
-            // Save document
-            if (claimFile != null && claimFile.Length > 0)
-            {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-                var fileName = Path.GetFileName(claimFile.FileName);
-                var filePath = Path.Combine(uploadsFolder, fileName);
-                using (var stream = new FileStream(filePath, FileMode.Create))
+                // Check if the claim exists
+                if (claim == null)
                 {
-                    claimFile.CopyTo(stream);
+                    return NotFound(new { success = false, message = "Claim not found." });
                 }
-                var document = new Document
+
+                // Update the claim properties
+                claim.ClaimStatus = model.status;
+                claim.AdminNotes = model.adminNotes; // Use AdminNotes if that's the correct field
+                claim.AdminApprovalDate = DateTime.Now;
+
+                // Mark the claim as modified in the context
+                _context.Claims.Update(claim);
+
+                // Update the AppliedPolicy enrollment status if the claim is approved
+                if (model.status == "Approved")
                 {
-                    ClaimId = claim.ClaimId,
-                    DocumentName = fileName,
-                    DocumentPath = "/uploads/" + fileName,
-                    DocumentType = Path.GetExtension(fileName)
-                };
-                _context.Documents.Add(document);
+                    var applied = _context.AppliedPolicies.FirstOrDefault(ap => ap.PolicyId == claim.PolicyId && ap.UserId == claim.UserId);
+                    if (applied != null)
+                    {
+                        applied.EnrollementStatus = "Claimed";
+                        _context.AppliedPolicies.Update(applied);
+                    }
+                }
+
+                // Save all changes to the database
                 _context.SaveChanges();
+
+                // Return a successful response
+                return Ok(new { success = true, message = "Claim status updated successfully." });
             }
-
-            // Deduct claimed amount from applied policy remaining coverage
-            appliedPolicy.Remainingamount = (appliedPolicy.Remainingamount ?? policy.CoverageAmount ?? 0m) - claimAmount;
-            appliedPolicy.EnrollementStatus = "Submittedforclaim";
-            _context.AppliedPolicies.Update(appliedPolicy);
-
-            // Do NOT update Policy.CoverageAmount
-
-            _context.SaveChanges();
-
-            TempData["SuccessMessage"] = "Claim submitted successfully.";
-            return RedirectToAction("MyClaims", "Claim");
-        }
-
-        [HttpGet]
-        public IActionResult MyClaims()
-        {
-            if (!int.TryParse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier), out int userId))
+            catch (Exception ex)
             {
-                return RedirectToAction("Login", "Account");
+                // Log the exception for debugging
+                Console.Error.WriteLine($"Error updating claim status: {ex.Message}");
+                return StatusCode(500, new { success = false, message = "An error occurred while updating the claim status." });
             }
-
-            var myClaims = _context.Claims
-                .Include(c => c.Policy)
-                .Where(c => c.UserId == userId)
-                .ToList();
-
-            return View("~/Views/Policyholder/MyClaims.cshtml", myClaims);
-        }
-
-        [HttpPost]
-        public IActionResult UpdateClaimStatus(int claimId, string status)
-        {
-            var claim = _context.Claims.FirstOrDefault(c => c.ClaimId == claimId);
-            if (claim == null) return NotFound();
-
-            claim.ClaimStatus = status;
-            _context.Claims.Update(claim);
-
-            if (status == "Approved")
-            {
-                var applied = _context.AppliedPolicies.FirstOrDefault(ap => ap.PolicyId == claim.PolicyId && ap.UserId == claim.UserId);
-                if (applied != null)
-                {
-                    applied.EnrollementStatus = "Claimed"; // allow re-enrollment
-                    _context.AppliedPolicies.Update(applied);
-                }
-            }
-
-            _context.SaveChanges();
-            return Ok();
         }
     }
 }

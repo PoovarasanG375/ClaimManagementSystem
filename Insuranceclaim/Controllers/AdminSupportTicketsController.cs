@@ -110,11 +110,23 @@ namespace Insuranceclaim.Controllers
 
             {
 
+                // No need for TempData, as the view is not updated on a NotFound.
+
                 return NotFound();
 
             }
 
-            // If a response is provided, automatically change the status to "Resolved"
+            // Check if the ticket is already resolved.
+
+            if (ticket.TicketStatus == "Resolved")
+
+            {
+
+                // No need for TempData, as the view is not updated on this redirect.
+
+                return RedirectToAction(nameof(Details), new { id = ticketId });
+
+            }
 
             if (!string.IsNullOrEmpty(responseMessage))
 
@@ -122,17 +134,13 @@ namespace Insuranceclaim.Controllers
 
                 ticket.Response = responseMessage;
 
-                ticket.TicketStatus = "Resolved"; // Set status to Resolved
+                ticket.TicketStatus = "Resolved";
 
             }
 
             else
 
             {
-
-                // If the response is cleared, the ticket should revert to "Open".
-
-                // This is a good practice to handle cases where an admin clears a response.
 
                 ticket.Response = null;
 
@@ -144,7 +152,9 @@ namespace Insuranceclaim.Controllers
 
             await _context.SaveChangesAsync();
 
-            return RedirectToAction(nameof(Details), new { id = ticketId });
+            // Redirect back to the Index page to refresh the list with the updated status.
+
+            return RedirectToAction(nameof(Index));
 
         }
 

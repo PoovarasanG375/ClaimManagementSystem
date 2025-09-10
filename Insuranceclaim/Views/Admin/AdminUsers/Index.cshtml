@@ -9,19 +9,100 @@
 }
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="https://www.google.com/search?q=https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<style>
+
+    /* Custom CSS for a cleaner, modern look */
+
+    .status-badge {
+        padding: 0.25rem 0.5rem; /* Reduced horizontal padding slightly */
+
+        border-radius: 20px;
+        color: black;
+        font-weight: 500;
+        text-transform: capitalize;
+        min-width: 90px; /* Fixed width for consistent badge size */
+
+        height: 30px; /* Sets a fixed height for all badges */
+
+        display: flex;
+        align-items: center; /* Vertically centers the text */
+
+        justify-content: center; /* Horizontally centers the text */
+
+        font-size: 0.8rem; /* Reduced font size for a smaller look */
+
+        text-align: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Updated color palette for badges */
+
+    .bg-agent {
+        background-color: lightgrey; /* A slightly softer blue */
+    }
+
+    .bg-claim-adjuster {
+        background-color: lightgrey; /* A softer orange */
+    }
+
+    .bg-policy-holder {
+        background-color: lightgrey; /* A softer green */
+    }
+
+    .card {
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Soft shadow for depth */
+
+        border: none;
+        border-radius: 10px;
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: #f8f9fa; /* Light gray on hover */
+
+        cursor: pointer;
+    }
+
+    /* Action button group styling */
+
+    .btn-action-group .btn {
+        margin-right: 5px;
+    }
+
+    /* Small card size for user counts */
+
+    .card.small-card .card-body {
+        padding: 0.75rem;
+    }
+
+    .card.small-card .card-title {
+        font-size: 0.85rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .card.small-card .card-text {
+        font-size: 1.5rem !important;
+    }
+
+    .card.small-card .fas {
+        font-size: 1.5rem;
+    }
+</style>
+
 
 <div class="container-fluid mt-4">
     <h3 class="mb-3">User Management</h3>
-    <p>Manage agents and claim adjusters.</p>
+    <p>Manage agents, claim adjusters, and policy holders.</p>
 
-    <!-- Stat Cards -->
     <div class="row text-center mb-4">
         <div class="col-md-4">
-            <div class="card text-white bg-info">
+            <div class="card text-dark small-card">
                 <div class="card-body">
+                    <i class="fas fa-briefcase fa-2x mb-2 text-primary"></i>
                     <h5 class="card-title">Total Agents</h5>
-                    <p class="card-text fs-4">
+                    <p class="card-text">
 
                         @Model.Count(u => u.Role == "Agent")
                     </p>
@@ -29,10 +110,11 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card text-white bg-warning">
+            <div class="card text-dark small-card">
                 <div class="card-body">
+                    <i class="fas fa-balance-scale fa-2x mb-2 text-warning"></i>
                     <h5 class="card-title">Claim Adjusters</h5>
-                    <p class="card-text fs-4">
+                    <p class="card-text">
 
                         @Model.Count(u => u.Role == "Claim Adjuster")
                     </p>
@@ -40,19 +122,19 @@
             </div>
         </div>
         <div class="col-md-4">
-            <div class="card text-white bg-success">
+            <div class="card text-dark small-card">
                 <div class="card-body">
-                    <h5 class="card-title">Total Users</h5>
-                    <p class="card-text fs-4">
+                    <i class="fas fa-user-shield fa-2x mb-2 text-success"></i>
+                    <h5 class="card-title">Policy Holders</h5>
+                    <p class="card-text">
 
-                        @Model.Count()
+                        @Model.Count(u => u.Role == "POLICY HOLDER")
                     </p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Filter and Create Button -->
     <div class="row mb-3 align-items-center">
         <div class="col-md-4">
             <form method="get" asp-action="Index">
@@ -60,7 +142,6 @@
                     <option value="" selected="@(string.IsNullOrEmpty(ViewBag.roleFilter))">All Roles</option>
                     <option value="Agent" selected="@(ViewBag.roleFilter == "Agent")">Agent</option>
                     <option value="Claim Adjuster" selected="@(ViewBag.roleFilter == "Claim Adjuster")">Claim Adjuster</option>
-                    <option value="ADMIN" selected="@(ViewBag.roleFilter == "ADMIN")">ADMIN</option>
                     <option value="POLICY HOLDER" selected="@(ViewBag.roleFilter == "POLICY HOLDER")">POLICY HOLDER</option>
                 </select>
             </form>
@@ -72,43 +153,111 @@
         </div>
     </div>
 
-    <!-- User List Table -->
     <div class="card">
-        <div class="card-header bg-secondary text-white">User List</div>
+        <div class="card-header bg-secondary text-white">
+            <span>User List</span>
+        </div>
         <div class="card-body">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
 
-                    @foreach (var user in Model)
+            @if (Model != null && Model.Any())
 
-                    {
-                        <tr>
-                            <td>@user.Username</td>
-                            <td>@user.Email</td>
-                            <td>@user.Role</td>
-                            <td>
-                                <a class="btn btn-sm btn-primary" href="/AdminUsers/Edit/@user.UserId">Edit</a>
-                                <a class="btn btn-sm btn-danger" href="/AdminUsers/Delete/@user.UserId">Delete</a>
-                            </td>
-                        </tr>
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-                    }
-                </tbody>
-            </table>
+                            @foreach (var user in Model)
+
+                            {
+
+                                string roleClass = "";
+
+                                string formattedRole = "";
+
+                                switch (user.Role.ToLower())
+
+                                {
+
+                                    case "agent":
+
+                                        roleClass = "bg-agent";
+
+                                        formattedRole = "Agent";
+
+                                        break;
+
+                                    case "claim adjuster":
+
+                                        roleClass = "bg-claim-adjuster";
+
+                                        formattedRole = "Claim Adjuster";
+
+                                        break;
+
+                                    case "policy holder":
+
+                                        roleClass = "bg-policy-holder";
+
+                                        formattedRole = "Policy Holder";
+
+                                        break;
+
+                                    default:
+
+                                        roleClass = "bg-secondary";
+
+                                        formattedRole = user.Role;
+
+                                        break;
+
+                                }
+
+                                <tr>
+                                    <td>@user.Username</td>
+                                    <td>@user.Email</td>
+                                    <td>
+                                        <span class="status-badge @roleClass">@formattedRole</span>
+                                    </td>
+                                    <td>
+                                        <a asp-action="Delete" asp-route-id="@user.UserId" class="btn btn-sm btn-danger" title="Delete User">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+            }
+
+            else
+
+            {
+                <div class="alert alert-info text-center" role="alert">
+                    <i class="fas fa-info-circle me-2"></i>
+
+                    No users found. Create the first user now.
+                    <button class="btn btn-sm btn-info ms-2" data-bs-toggle="modal" data-bs-target="#createUserModal">
+
+                        Create User
+                    </button>
+                </div>
+
+            }
         </div>
     </div>
 
 </div>
-
-<!-- Create User Modal -->
 
 <div class="modal fade" id="createUserModal" tabindex="-1" aria-labelledby="createUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -117,7 +266,7 @@
                 <h5 class="modal-title" id="createUserModalLabel">Create New User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form asp-action="Create" method="post">
+            <form asp-action="Create" method="post" asp-area="Admin" asp-controller="AdminUsers">
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
@@ -148,4 +297,55 @@
     </div>
 </div>
 
-<script src="https://www.google.com/search?q=https://cdn.jsdelivr.net/npm/bootstrap%405.3.7/dist/js/bootstrap.bundle.min.js"></script>
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteUserModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+
+                Are you sure you want to delete user "<strong id="userNameToDelete"></strong>"? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <a id="confirmDeleteButton" class="btn btn-danger">Delete</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+
+        var deleteUserModal = document.getElementById('deleteUserModal');
+
+        deleteUserModal.addEventListener('show.bs.modal', function (event) {
+
+            // Button that triggered the modal
+
+            var button = event.relatedTarget;
+
+            // Extract info from data-bs-* attributes
+
+            var userId = button.getAttribute('data-user-id');
+
+            var userName = button.getAttribute('data-user-name');
+
+            // Update the modal's content.
+
+            var modalBodyInput = deleteUserModal.querySelector('#userNameToDelete');
+
+            var confirmDeleteButton = deleteUserModal.querySelector('#confirmDeleteButton');
+
+            modalBodyInput.textContent = userName;
+
+            confirmDeleteButton.href = '/Admin/AdminUsers/Delete/' + userId;
+
+        });
+    </script>
+
+}

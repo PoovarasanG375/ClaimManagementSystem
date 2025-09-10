@@ -22,12 +22,14 @@
     }
 
     body {
-        font-family: 'Segoe UI', Arial, sans-serif;
+        /* Using a system font stack for a clean, fast-loading look */
+
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
         background-color: var(--background-light);
     }
 
     .main-content {
-        padding: 2.5rem;
+        padding: 1rem;
     }
 
     h2 {
@@ -44,40 +46,6 @@
         box-shadow: var(--card-shadow);
     }
 
-    .support-ticket-container {
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        margin-top: 1.5rem;
-    }
-
-    .ticket-card {
-        background-color: var(--card-bg);
-        padding: 1.5rem;
-        border-radius: 10px;
-        box-shadow: var(--card-shadow);
-        transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
-    }
-
-        .ticket-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-        }
-
-    .ticket-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 1rem;
-    }
-
-        .ticket-header h4 {
-            margin: 0;
-            font-weight: 600;
-            color: var(--text-dark);
-            font-size: 1.25rem;
-        }
-
     .status-badge {
         padding: 0.4rem 0.8rem;
         border-radius: 20px;
@@ -92,24 +60,81 @@
     }
 
     .status-open {
-        background-color: #e74c3c; /* Red */
+        background-color: #ffc107; /* Red */
 
         color: #fff;
     }
 
-    .ticket-info p {
-        margin: 0.5rem 0;
-        font-size: 0.95rem;
-        color: var(--secondary-gray);
+    .table-responsive {
+        margin-top: 1.5rem;
     }
 
-    .ticket-info strong {
-        color: var(--text-dark);
+    .table th, .table td {
+        white-space: nowrap;
+        vertical-align: middle;
+        padding: 1rem; /* Added padding for more space */
     }
 
-    .view-details-btn {
-        align-self: flex-end;
-        margin-top: 1rem;
+        /* Adjust column widths for better readability */
+
+        .table th:nth-child(1), .table td:nth-child(1) { /* Username */
+
+            width: 15%;
+        }
+
+        .table th:nth-child(2), .table td:nth-child(2) { /* Issue Description */
+
+            width: 45%;
+            white-space: normal; /* Allow text wrapping for long descriptions */
+        }
+
+        .table th:nth-child(3), .table td:nth-child(3) { /* Status */
+
+            width: 15%;
+        }
+
+        .table th:nth-child(4), .table td:nth-child(4) { /* Created Date */
+
+            width: 15%;
+        }
+
+        .table th:nth-child(5), .table td:nth-child(5) { /* Actions */
+
+            width: 10%;
+        }
+
+    /* Hover effect for table rows */
+
+    .table tbody tr:hover {
+        background-color: #f0f2f5; /* Lighter background on hover */
+
+        transition: background-color 0.3s ease;
+    }
+
+    /* Center the arrow icon and make the entire cell clickable */
+
+    .action-cell {
+        text-align: center;
+        position: relative;
+    }
+
+    .action-link {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        text-decoration: none;
+        font-size: 1.5rem; /* Make the arrow larger for better visibility */
+
+        font-weight: bold; /* Make the arrow thicker */
+
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-blue) !important; /* Changed color to primary-blue for consistency */
     }
 </style>
 
@@ -124,34 +149,47 @@
         <a asp-action="Index" asp-route-statusFilter="Resolved" class="btn @(ViewBag.StatusFilter == "Resolved" ? "btn-primary" : "btn-outline-primary")">Resolved</a>
     </div>
 
-    <div class="support-ticket-container">
+    <div class="table-responsive">
 
         @if (Model.Any())
 
         {
+            <table class="table table-hover table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Issue Description</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th class="text-center">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
 
-            @foreach (var ticket in Model)
+                    @foreach (var ticket in Model)
 
-            {
-                <div class="ticket-card">
-                    <div class="ticket-header">
-                        <span class="status-badge @(ticket.TicketStatus?.ToLower() == "resolved" ? "status-resolved" : "status-open")">
+                    {
+                        <tr>
+                            <td>@ticket.User?.Username</td>
+                            <td>@ticket.IssueDescription</td>
+                            <td>
+                                <span class="status-badge @(ticket.TicketStatus?.ToLower() == "resolved" ? "status-resolved" : "status-open")">
 
-                            @ticket.TicketStatus
-                        </span>
-                    </div>
-                    <div class="ticket-info">
-                        <p><strong>Username:</strong> @ticket.User?.Username</p>
-                        <p><strong>Created:</strong> @ticket.CreatedDate?.ToString("dd/MM/yyyy")</p>
-                        <p><strong>Description:</strong> @ticket.IssueDescription</p>
-                        <p><strong>Response:</strong> @(!string.IsNullOrEmpty(ticket.Response) ? ticket.Response : "No response yet.")</p>
-                    </div>
-                    <div class="view-details-btn">
-                        <a asp-controller="AdminSupportTickets" asp-action="Details" asp-route-id="@ticket.TicketId" class="btn btn-primary">View Details</a>
-                    </div>
-                </div>
+                                    @ticket.TicketStatus
+                                </span>
+                            </td>
+                            <td>@ticket.CreatedDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="action-cell">
+                                <a asp-controller="AdminSupportTickets" asp-action="Details" asp-route-id="@ticket.TicketId" class="action-link">
 
-            }
+                                    →
+                                </a>
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
 
         }
 
@@ -166,3 +204,4 @@
         }
     </div>
 </div>
+

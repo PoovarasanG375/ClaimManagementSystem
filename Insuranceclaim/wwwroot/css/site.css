@@ -3,6 +3,7 @@
    ======================================= */
 body {
     font-family: 'Segoe UI', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background-color: white;
     margin: 0;
     padding: 0;
@@ -340,7 +341,7 @@ footer {
     margin-bottom: 1rem;
 }
 
-@keyframes floating {
+/*@keyframes floating {
     0%, 100% {
         transform: translateY(0);
     }
@@ -348,7 +349,7 @@ footer {
     50% {
         transform: translateY(-10px);
     }
-}
+}*/
 
 /* =======================================
    Contact Page Styles (from contact.html)

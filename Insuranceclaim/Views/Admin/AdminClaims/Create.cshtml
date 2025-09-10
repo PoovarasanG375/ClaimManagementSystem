@@ -1,7 +1,9 @@
 ﻿@model Insuranceclaim.Models.Claim
 
 @{
+
     ViewData["Title"] = "Create";
+
 }
 
 <h1>Create</h1>
@@ -14,7 +16,7 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="PolicyId" class="control-label"></label>
-                <select asp-for="PolicyId" class ="form-control" asp-items="ViewBag.PolicyId"></select>
+                <select asp-for="PolicyId" class="form-control" asp-items="ViewBag.PolicyId"></select>
             </div>
             <div class="form-group">
                 <label asp-for="ClaimAmount" class="control-label"></label>
@@ -33,11 +35,11 @@
             </div>
             <div class="form-group">
                 <label asp-for="AdjusterId" class="control-label"></label>
-                <select asp-for="AdjusterId" class ="form-control" asp-items="ViewBag.AdjusterId"></select>
+                <select asp-for="AdjusterId" class="form-control" asp-items="ViewBag.AdjusterId"></select>
             </div>
             <div class="form-group">
                 <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
+                <select asp-for="UserId" class="form-control" asp-items="ViewBag.UserId"></select>
             </div>
             <div class="form-group">
                 <label asp-for="DescriptionofIncident" class="control-label"></label>
@@ -76,5 +78,10 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
 }
+

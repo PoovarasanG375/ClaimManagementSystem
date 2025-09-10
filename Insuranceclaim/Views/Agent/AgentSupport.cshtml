@@ -1,6 +1,6 @@
 ﻿@model List<Insuranceclaim.Models.SupportTicket>
 @{
-    Layout = "~/Views/Shared/_PolicyholderLayout.cshtml";
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
     ViewData["Title"] = "Support";
     ViewBag.Page = "Support";
 }
@@ -15,7 +15,6 @@
         </div>
     </div>
 </div>
-
 
 <div class="container-fluid ">
     <div class="mb-5">
@@ -74,7 +73,7 @@
                                 <td>@ticket.Response</td>
                             </tr>
                         }
-                        
+
                     </tbody>
                 </table>
             </div>
@@ -90,9 +89,9 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="support-ticket-form" asp-action="CreateSupportTicket" asp-controller="Policyholder" method="post">
-
+                <form id="support-ticket-form" asp-action="CreateSupportTicket" asp-controller="AgentPolicies" method="post">
                     @Html.AntiForgeryToken()
+                    <input type="hidden" name="targetUserId" value="@ViewBag.TargetUserId" />
 
                     <div class="mb-3">
                         <label for="issueDescription" class="form-label">Describe the issue</label>

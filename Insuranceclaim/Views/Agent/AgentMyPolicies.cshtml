@@ -1,6 +1,6 @@
 ﻿@model List<Insuranceclaim.Models.Policy>
 @{
-    Layout = "~/Views/Shared/_PolicyholderLayout.cshtml";
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
     ViewData["Title"] = "My Policies";
     ViewBag.Page = "MyPolicies";
 }
@@ -41,8 +41,9 @@
 
 <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
-        <form id="claimForm" asp-controller="Policyholder" asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="modal-content">
+        <form id="claimForm" asp-controller="AgentPolicies" asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="modal-content">
             <input type="hidden" id="claim-policy-id" name="policyId">
+            <input type="hidden" name="targetUserId" value="@ViewBag.TargetUserId" />
             <div class="modal-header">
                 <h5 class="modal-title" id="uploadModalLabel">Submit Claim</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -85,15 +86,15 @@
         $(document).ready(function() {
             @if (TempData["SuccessMessage"] != null)
             {
-                        <text>
-                            toastr.success('@Html.Raw(TempData["SuccessMessage"])');
-                        </text>
+                            <text>
+                                toastr.success('@Html.Raw(TempData["SuccessMessage"])');
+                            </text>
             }
             @if (TempData["ErrorMessage"] != null)
             {
-                        <text>
-                            toastr.error('@Html.Raw(TempData["ErrorMessage"])');
-                        </text>
+                            <text>
+                                toastr.error('@Html.Raw(TempData["ErrorMessage"])');
+                            </text>
             }
         });
 
