@@ -29,13 +29,13 @@ public partial class ClaimManagementSystemContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Server=LTIN650319\\SQLEXPRESS;Database=ClaimManagementSystem;Trusted_Connection=true;TrustServerCertificate=True;");
+        => optionsBuilder.UseSqlServer("Server=LTIN650294;Database=ClaimManagementSystem;Trusted_Connection=True;TrustServerCertificate=True;");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AppliedPolicy>(entity =>
         {
-            entity.HasKey(e => e.ApplyId).HasName("PK__AppliedP__F0687FB140240E97");
+            entity.HasKey(e => e.ApplyId).HasName("PK__AppliedP__F0687FB1CD891A09");
 
             entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
             entity.Property(e => e.EnrollementStatus)
@@ -47,16 +47,16 @@ public partial class ClaimManagementSystemContext : DbContext
 
             entity.HasOne(d => d.Policy).WithMany(p => p.AppliedPolicies)
                 .HasForeignKey(d => d.PolicyId)
-                .HasConstraintName("FK__AppliedPo__polic__5FB337D6");
+                .HasConstraintName("FK__AppliedPo__polic__70DDC3D8");
 
             entity.HasOne(d => d.User).WithMany(p => p.AppliedPolicies)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__AppliedPo__userI__5EBF139D");
+                .HasConstraintName("FK__AppliedPo__userI__6FE99F9F");
         });
 
         modelBuilder.Entity<Claim>(entity =>
         {
-            entity.HasKey(e => e.ClaimId).HasName("PK__Claim__01BDF9D305441C17");
+            entity.HasKey(e => e.ClaimId).HasName("PK__Claim__01BDF9D39DE193A7");
 
             entity.ToTable("Claim");
 
@@ -82,20 +82,20 @@ public partial class ClaimManagementSystemContext : DbContext
 
             entity.HasOne(d => d.Adjuster).WithMany(p => p.ClaimAdjusters)
                 .HasForeignKey(d => d.AdjusterId)
-                .HasConstraintName("FK__Claim__adjusterI__45F365D3");
+                .HasConstraintName("FK__Claim__adjusterI__3E52440B");
 
             entity.HasOne(d => d.Policy).WithMany(p => p.Claims)
                 .HasForeignKey(d => d.PolicyId)
-                .HasConstraintName("FK__Claim__policyId__44FF419A");
+                .HasConstraintName("FK__Claim__policyId__3D5E1FD2");
 
             entity.HasOne(d => d.User).WithMany(p => p.ClaimUsers)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__Claim__userId__60A75C0F");
+                .HasConstraintName("FK__Claim__userId__72C60C4A");
         });
 
         modelBuilder.Entity<Document>(entity =>
         {
-            entity.HasKey(e => e.DocumentId).HasName("PK__Document__EFAAAD85F564A1AE");
+            entity.HasKey(e => e.DocumentId).HasName("PK__Document__EFAAAD85C84B6C7B");
 
             entity.ToTable("Document");
 
@@ -116,12 +116,12 @@ public partial class ClaimManagementSystemContext : DbContext
 
             entity.HasOne(d => d.Claim).WithMany(p => p.Documents)
                 .HasForeignKey(d => d.ClaimId)
-                .HasConstraintName("FK__Document__claimI__48CFD27E");
+                .HasConstraintName("FK__Document__claimI__412EB0B6");
         });
 
         modelBuilder.Entity<Policy>(entity =>
         {
-            entity.HasKey(e => e.PolicyId).HasName("PK__Policy__78E3A9229705EC33");
+            entity.HasKey(e => e.PolicyId).HasName("PK__Policy__78E3A9220DBC707E");
 
             entity.ToTable("Policy");
 
@@ -150,16 +150,15 @@ public partial class ClaimManagementSystemContext : DbContext
 
             entity.HasOne(d => d.Policyholder).WithMany(p => p.Policies)
                 .HasForeignKey(d => d.PolicyholderId)
-                .HasConstraintName("FK__Policy__policyho__4222D4EF");
+                .HasConstraintName("FK__Policy__policyho__3A81B327");
         });
 
         modelBuilder.Entity<SupportTicket>(entity =>
         {
-            entity.HasKey(e => e.TicketId).HasName("PK__SupportT__3333C6100A72A2E3");
+            entity.HasKey(e => e.TicketId).HasName("PK__SupportT__712CC6076AC675E9");
 
             entity.ToTable("SupportTicket");
 
-            entity.Property(e => e.TicketId).HasColumnName("ticketId");
             entity.Property(e => e.CreatedDate).HasColumnName("createdDate");
             entity.Property(e => e.IssueDescription)
                 .HasColumnType("text")
@@ -178,16 +177,16 @@ public partial class ClaimManagementSystemContext : DbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.SupportTickets)
                 .HasForeignKey(d => d.UserId)
-                .HasConstraintName("FK__SupportTi__userI__4BAC3F29");
+                .HasConstraintName("FK__SupportTi__userI__440B1D61");
         });
 
         modelBuilder.Entity<User>(entity =>
         {
-            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CFF8AE9D2B4");
+            entity.HasKey(e => e.UserId).HasName("PK__User__CB9A1CFF4D0CF3EA");
 
             entity.ToTable("User");
 
-            entity.HasIndex(e => e.Username, "UQ__User__F3DBC57257FFADC1").IsUnique();
+            entity.HasIndex(e => e.Username, "UQ__User__F3DBC572473700B2").IsUnique();
 
             entity.Property(e => e.UserId).HasColumnName("userId");
             entity.Property(e => e.Email)

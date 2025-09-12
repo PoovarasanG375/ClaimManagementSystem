@@ -44,18 +44,14 @@ namespace Insuranceclaim.Controllers
                 var applied = appliedPolicies.FirstOrDefault(ap => ap.PolicyId == policy.PolicyId);
                 if (applied != null)
                 {
-                    var status = (applied.EnrollementStatus ?? string.Empty).ToLower();
-                    if (status == "enrolled" || status == "submitted for claim")
+                    // Update: Allow re-enrollment only when remaining amount is 0.
+                    if (applied.Remainingamount <= 0 && applied.EnrollementStatus == "Claimed")
+                    {
+                        policy.PolicyStatus = "Available"; // Allow re-enrollment
+                    }
+                    else if ((applied.EnrollementStatus ?? string.Empty).ToLower() == "enrolled" || (applied.EnrollementStatus ?? string.Empty).ToLower() == "submitted for claim" || (applied.EnrollementStatus ?? string.Empty).ToLower() == "claimed")
                     {
                         policy.PolicyStatus = "Enrolled"; // show Already Enrolled
-                    }
-                    else if (status == "available")
-                    {
-                        policy.PolicyStatus = "Available"; // show Enroll Now
-                    }
-                    else if (status == "claimed")
-                    {
-                        policy.PolicyStatus = "Available"; // claimed -> can enroll again
                     }
                     else
                     {
@@ -83,6 +79,21 @@ namespace Insuranceclaim.Controllers
             var appliedPolicies = _context.AppliedPolicies
                 .Where(ap => ap.UserId == userId)
                 .ToList();
+             // Expire policies that are enrolled for more than 1 year and not claimed
+            var today = DateOnly.FromDateTime(DateTime.Now);
+            foreach (var ap in appliedPolicies)
+            {
+                if ((ap.EnrollementStatus == "Enrolled" || ap.EnrollementStatus == "enrolled") && ap.CreatedDate.HasValue)
+                {
+                    var enrolledDate = ap.CreatedDate.Value;
+                    if (enrolledDate.AddYears(1) <= today)
+                    {
+                        ap.EnrollementStatus = "Expired";
+                        _context.AppliedPolicies.Update(ap);
+                    }
+                }
+            }
+            _context.SaveChanges();
 
             // Join applied policies with policy details and show Remainingamount as CoverageAmount
             var enrolledPolicies = appliedPolicies
@@ -146,6 +157,85 @@ namespace Insuranceclaim.Controllers
             return View(tickets);
         }
 
+        [HttpGet]
+        public IActionResult GetClaimDetails(int id)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var claim = _context.Claims
+                .Include(c => c.Policy)
+                .Include(c => c.Adjuster)
+                .FirstOrDefault(c => c.ClaimId == id && c.UserId == userId);
+
+            if (claim == null)
+                return NotFound();
+
+            var documents = _context.Documents
+                .Where(d => d.ClaimId == id)
+                .Select(d => new { d.DocumentId, d.DocumentName, d.DocumentPath })
+                .ToList();
+
+            return Json(new
+            {
+                claimId = claim.ClaimId,
+                policyId = claim.PolicyId,
+                policyName = claim.Policy?.PolicyName,
+                claimAmount = claim.ClaimAmount,
+                claimDate = claim.ClaimDate.HasValue ? claim.ClaimDate.Value.ToString("yyyy-MM-dd") : string.Empty,
+                status = claim.ClaimStatus,
+                adjusterNotes = claim.AdjusterNotes,
+                adminNotes = claim.AdminNotes,
+                documents
+            });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult ResubmitClaim(int claimId)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            var claim = _context.Claims.FirstOrDefault(c => c.ClaimId == claimId && c.UserId == userId);
+            if (claim == null)
+            {
+                TempData["ErrorMessage"] = "Claim not found.";
+                return RedirectToAction("MyClaims");
+            }
+
+            if (!string.Equals(claim.ClaimStatus, "Rejected", StringComparison.OrdinalIgnoreCase))
+            {
+                TempData["ErrorMessage"] = "Only rejected claims can be restored for resubmission.";
+                return RedirectToAction("MyClaims");
+            }
+
+            var applied = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == claim.PolicyId);
+            var policy = _context.Policies.FirstOrDefault(p => p.PolicyId == claim.PolicyId);
+            if (applied == null || policy == null)
+            {
+                TempData["ErrorMessage"] = "Policy enrollment not found.";
+                return RedirectToAction("MyClaims");
+            }
+
+            // Add back the rejected claim amount to the remaining coverage so user can resubmit
+            applied.Remainingamount = (applied.Remainingamount ?? policy.CoverageAmount ?? 0m) + (claim.ClaimAmount ?? 0m);
+            applied.EnrollementStatus = "Enrolled";
+            _context.AppliedPolicies.Update(applied);
+
+            // Mark the claim as Cancelled so it won't be considered again
+            claim.ClaimStatus = "Cancelled";
+            _context.Claims.Update(claim);
+
+            _context.SaveChanges();
+
+            TempData["SuccessMessage"] = "Claim amount restored to your policy. You can resubmit from My Policies.";
+            return RedirectToAction("MyPolicies");
+        }
         [HttpPost]
         public IActionResult EnrollPolicy(int policyId)
         {
@@ -160,23 +250,27 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("AvailablePolicies");
             }
 
-            var isAlreadyEnrolled = _context.AppliedPolicies.Any(ap => ap.UserId == userId && ap.PolicyId == policyId && (ap.EnrollementStatus == "Enrolled" || ap.EnrollementStatus == "Submitted for claim"));
-            if (isAlreadyEnrolled)
+            var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
+
+            if (appliedPolicy != null && (appliedPolicy.EnrollementStatus == "Enrolled" || appliedPolicy.EnrollementStatus == "Submitted for claim"))
+            {
+                return RedirectToAction("AvailablePolicies");
+            }
+            if (appliedPolicy != null && appliedPolicy.Remainingamount > 0)
             {
                 return RedirectToAction("AvailablePolicies");
             }
 
-            var existing = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
-            if (existing != null)
+            if (appliedPolicy != null)
             {
-                existing.EnrollementStatus = "Enrolled";
-                existing.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
+                appliedPolicy.EnrollementStatus = "Enrolled";
+                appliedPolicy.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
                 // initialize Remainingamount if null
-                if (existing.Remainingamount == null)
+                if (appliedPolicy.Remainingamount == null || appliedPolicy.Remainingamount <= 0)
                 {
-                    existing.Remainingamount = policy.CoverageAmount;
+                    appliedPolicy.Remainingamount = policy.CoverageAmount;
                 }
-                _context.AppliedPolicies.Update(existing);
+                _context.AppliedPolicies.Update(appliedPolicy);
             }
             else
             {
@@ -219,6 +313,13 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("MyPolicies", "Policyholder");
             }
 
+            //// New: Check if the policy has been enrolled for at least one day before allowing a claim
+            if (appliedPolicy.CreatedDate >= DateOnly.FromDateTime(DateTime.Now))
+            {
+                TempData["ErrorMessage"] = "You can only submit a claim from the day after your enrollment date.";
+                return RedirectToAction("MyPolicies", "Policyholder");
+            }
+
             // Minimum claim amount check
             if (claimAmount < 5000m)
             {
@@ -246,6 +347,7 @@ namespace Insuranceclaim.Controllers
                 PolicyId = policyId,
                 ClaimAmount = claimAmount,
                 ClaimDate = DateOnly.FromDateTime(DateTime.Now),
+                IncidentDate = incidentDate,
                 ClaimStatus = "Pending",
                 UserId = userId,
                 DescriptionofIncident = incidentDescription
