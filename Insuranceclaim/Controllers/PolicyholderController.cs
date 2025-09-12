@@ -5,6 +5,7 @@ using Claim = System.Security.Claims.Claim;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using System;
 
 namespace Insuranceclaim.Controllers
 {
@@ -44,18 +45,14 @@ namespace Insuranceclaim.Controllers
                 var applied = appliedPolicies.FirstOrDefault(ap => ap.PolicyId == policy.PolicyId);
                 if (applied != null)
                 {
-                    var status = (applied.EnrollementStatus ?? string.Empty).ToLower();
-                    if (status == "enrolled" || status == "submitted for claim")
+                    // Update: Allow re-enrollment only when remaining amount is 0.
+                    if (applied.Remainingamount <= 0 && applied.EnrollementStatus == "Claimed")
+                    {
+                        policy.PolicyStatus = "Available"; // Allow re-enrollment
+                    }
+                    else if ((applied.EnrollementStatus ?? string.Empty).ToLower() == "enrolled" || (applied.EnrollementStatus ?? string.Empty).ToLower() == "submitted for claim" || (applied.EnrollementStatus ?? string.Empty).ToLower() == "claimed")
                     {
                         policy.PolicyStatus = "Enrolled"; // show Already Enrolled
-                    }
-                    else if (status == "available")
-                    {
-                        policy.PolicyStatus = "Available"; // show Enroll Now
-                    }
-                    else if (status == "claimed")
-                    {
-                        policy.PolicyStatus = "Available"; // claimed -> can enroll again
                     }
                     else
                     {
@@ -160,23 +157,28 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("AvailablePolicies");
             }
 
-            var isAlreadyEnrolled = _context.AppliedPolicies.Any(ap => ap.UserId == userId && ap.PolicyId == policyId && (ap.EnrollementStatus == "Enrolled" || ap.EnrollementStatus == "Submitted for claim"));
-            if (isAlreadyEnrolled)
+            // Update: A policy can only be enrolled if the remaining amount is 0.
+            var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
+
+            if (appliedPolicy != null && (appliedPolicy.EnrollementStatus == "Enrolled" || appliedPolicy.EnrollementStatus == "Submitted for claim"))
+            {
+                return RedirectToAction("AvailablePolicies");
+            }
+            if (appliedPolicy != null && appliedPolicy.Remainingamount > 0)
             {
                 return RedirectToAction("AvailablePolicies");
             }
 
-            var existing = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
-            if (existing != null)
+            if (appliedPolicy != null)
             {
-                existing.EnrollementStatus = "Enrolled";
-                existing.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
+                appliedPolicy.EnrollementStatus = "Enrolled";
+                appliedPolicy.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
                 // initialize Remainingamount if null
-                if (existing.Remainingamount == null)
+                if (appliedPolicy.Remainingamount == null || appliedPolicy.Remainingamount <= 0)
                 {
-                    existing.Remainingamount = policy.CoverageAmount;
+                    appliedPolicy.Remainingamount = policy.CoverageAmount;
                 }
-                _context.AppliedPolicies.Update(existing);
+                _context.AppliedPolicies.Update(appliedPolicy);
             }
             else
             {
@@ -219,6 +221,13 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("MyPolicies", "Policyholder");
             }
 
+            // New: Check if the policy has been enrolled for at least one day before allowing a claim
+            if (appliedPolicy.CreatedDate >= DateOnly.FromDateTime(DateTime.Now))
+            {
+                TempData["ErrorMessage"] = "You can only submit a claim from the day after your enrollment date.";
+                return RedirectToAction("MyPolicies", "Policyholder");
+            }
+
             // Minimum claim amount check
             if (claimAmount < 5000m)
             {
@@ -246,6 +255,7 @@ namespace Insuranceclaim.Controllers
                 PolicyId = policyId,
                 ClaimAmount = claimAmount,
                 ClaimDate = DateOnly.FromDateTime(DateTime.Now),
+                IncidentDate = incidentDate,
                 ClaimStatus = "Pending",
                 UserId = userId,
                 DescriptionofIncident = incidentDescription
