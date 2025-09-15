@@ -16,7 +16,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #488AFB;
             --secondary-color: #f0f4f8;
             --text-dark: #333;
             --text-light: #555;
@@ -31,7 +30,7 @@
         }
 
         .navbar {
-            background-color: var(--primary-color);
+            background-image: linear-gradient(to right, #4d657e, #344f6c, #012347);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -119,9 +118,11 @@
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark">
+    <nav class="navbar navbar-expand-lg">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Claim Adjuster Portal</a>
+            <a class="navbar-brand" href="#">
+                <img src="https://cdn-icons-png.flaticon.com/128/2966/2966486.png" style="width:30px; height:30px" />&nbsp; &nbsp;Claim Adjuster Portal
+            </a>
             <a href="@Url.Action("Index", "Home")" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>

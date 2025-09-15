@@ -22,6 +22,7 @@ namespace Insuranceclaim.Controllers
             return RedirectToAction("AvailablePolicies");
         }
 
+        // ... other code ...
         [HttpGet]
         public IActionResult AvailablePolicies()
         {
@@ -38,9 +39,17 @@ namespace Insuranceclaim.Controllers
                 .Where(ap => ap.UserId == userId)
                 .ToList();
 
-            // Determine policy status based on AppliedPolicies.EnrollementStatus
+            // Determine policy status based on AppliedPolicies.EnrollementStatus and Policy.PolicyStatus
             foreach (var policy in allPolicies)
             {
+                // New logic: Check if the policy is marked INACTIVE
+                var adminPolicy = _context.Policies.FirstOrDefault(p => p.PolicyId == policy.PolicyId);
+                if (adminPolicy != null && (adminPolicy.PolicyStatus ?? string.Empty).ToLower() == "inactive")
+                {
+                    policy.PolicyStatus = "INACTIVE"; // Show as INACTIVE
+                    continue; // Skip other checks as enrollment is not allowed
+                }
+
                 var applied = appliedPolicies.FirstOrDefault(ap => ap.PolicyId == policy.PolicyId);
                 if (applied != null)
                 {
@@ -66,7 +75,6 @@ namespace Insuranceclaim.Controllers
 
             return View(allPolicies);
         }
-
         [HttpGet]
         public IActionResult MyPolicies()
         {
@@ -313,12 +321,18 @@ namespace Insuranceclaim.Controllers
                 return RedirectToAction("MyPolicies", "Policyholder");
             }
 
-            //// New: Check if the policy has been enrolled for at least one day before allowing a claim
-            if (appliedPolicy.CreatedDate >= DateOnly.FromDateTime(DateTime.Now))
+            if (appliedPolicy.CreatedDate.HasValue && incidentDate <= appliedPolicy.CreatedDate.Value)
             {
-                TempData["ErrorMessage"] = "You can only submit a claim from the day after your enrollment date.";
+                TempData["ErrorMessage"] = "The incident date cannot be on or before your policy enrollment date.";
                 return RedirectToAction("MyPolicies", "Policyholder");
             }
+
+            // New: Check if the policy has been enrolled for at least one day before allowing a claim
+            //if (appliedPolicy.CreatedDate >= DateOnly.FromDateTime(DateTime.Now))
+            //{
+            //    TempData["ErrorMessage"] = "You can only submit a claim from the day after your enrollment date.";
+            //    return RedirectToAction("MyPolicies", "Policyholder");
+            //}
 
             // Minimum claim amount check
             if (claimAmount < 5000m)

@@ -45,7 +45,7 @@
 
                                     statusBadgeClass = "custom-pending-admin-review";
                                 }
-                                else if (claim.ClaimStatus == "Rejected")
+                                else if (claim.ClaimStatus == "Rejected" || claim.ClaimStatus == "Cancelled")
                                 {
                                     statusBadgeClass = "bg-danger";
                                 }
@@ -109,41 +109,6 @@
     </div>
 </div>
 
-<!-- Claim Details Modal -->
-<div class="modal fade" id="claimDetailsModal" tabindex="-1" aria-labelledby="claimDetailsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="claimDetailsModalLabel">Claim Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div id="claim-details-content">
-                    <p><strong>Policy:</strong> <span id="cd-policy-name"></span></p>
-                    <p><strong>Amount:</strong> <span id="cd-amount"></span></p>
-                    <p><strong>Incident Date:</strong> <span id="cd-date"></span></p>
-                    <p><strong>Status:</strong> <span id="cd-status"></span></p>
-                    <p><strong>Adjuster Notes:</strong> <span id="cd-adjuster-notes"></span></p>
-                    <p><strong>Admin Notes:</strong> <span id="cd-admin-notes"></span></p>
-
-                    <div>
-                        <strong>Documents:</strong>
-                        <ul id="cd-documents" class="list-unstyled ms-2"></ul>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <form id="resubmitForm" asp-controller="Policyholder" asp-action="ResubmitClaim" method="post" class="d-inline">
-                    @Html.AntiForgeryToken()
-                    <input type="hidden" id="resubmit-claim-id" name="claimId" value="" />
-                    <button type="submit" id="resubmit-btn" class="btn btn-primary">Resubmit Claim</button>
-                </form>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 @section Scripts {
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
@@ -154,7 +119,7 @@
                 var claimId = btn.data('claim-id');
                 if (!claimId) return;
 
-                // Clear previous
+                // Clear previous data
                 $('#cd-policy-name').text('');
                 $('#cd-amount').text('');
                 $('#cd-date').text('');
@@ -180,14 +145,17 @@
 
                         if (data.documents && data.documents.length) {
                             data.documents.forEach(function (doc) {
-                                var li = $('<li/>');
-                                var a = $('<a/>').attr('href', doc.DocumentPath || doc.documentPath || '#').attr('target', '_blank').text(doc.DocumentName || doc.documentName || 'Document');
-                                li.append(a);
-                                $('#cd-documents').append(li);
+                                // Check if an element with the same document path already exists
+                                var existingDoc = $('#cd-documents a[href="' + (doc.DocumentPath || doc.documentPath) + '"]');
+                                if (existingDoc.length === 0) {
+                                    var li = $('<li/>');
+                                    var a = $('<a/>').attr('href', doc.DocumentPath || doc.documentPath || '#').attr('target', '_blank').text(doc.DocumentName || doc.documentName || 'Document');
+                                    li.append(a);
+                                    $('#cd-documents').append(li);
+                                }
                             });
                         }
 
-                        // If rejected, show resubmit button
                         if (data.status && data.status.toLowerCase() === 'rejected') {
                             $('#resubmit-claim-id').val(data.claimId);
                             $('#resubmit-btn').show();
@@ -198,14 +166,12 @@
                     });
             });
 
-            // Prevent resubmit button unless claim is rejected - server will validate too
             $('#resubmitForm').on('submit', function (e) {
                 var claimId = $('#resubmit-claim-id').val();
                 if (!claimId) {
                     e.preventDefault();
                     return;
                 }
-                // allow post to server which will adjust Remainingamount and redirect to MyPolicies
             });
         });
     </script>

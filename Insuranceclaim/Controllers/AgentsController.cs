@@ -31,7 +31,7 @@ namespace Insuranceclaim.Controllers
 
             var policyholders = await _context.Users
                                                 .Include(u => u.Agent)
-                                                .Where(u => u.Role == "Policyholder" && u.AgentId == agentId)
+                                                .Where(u => u.Role == "POLICY HOLDER" && u.AgentId == agentId)
                                                 .ToListAsync();
 
             return View("~/Views/Agent/Agents.cshtml", policyholders);
@@ -50,7 +50,7 @@ namespace Insuranceclaim.Controllers
                     return Json(new { success = false, message = "User is not authorized." });
                 }
 
-                policyholderUser.Role = "Policyholder";
+                policyholderUser.Role = "POLICY HOLDER";
                 policyholderUser.AgentId = int.Parse(agentIdStr);
                 policyholderUser.Password = Guid.NewGuid().ToString();
 

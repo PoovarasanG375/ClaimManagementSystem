@@ -217,6 +217,10 @@
                                     {
                                         <button class="btn btn-already-enrolled w-100">Already Enrolled</button>
                                     }
+                                    else if(policy.PolicyStatus == "INACTIVE")
+                                    {
+                                    <button class="btn btn-already-enrolled w-100">@policy.PolicyStatus</button>
+                                    }
                                     else
                                     {
                                         <button type="button" class="btn btn-enroll w-100"

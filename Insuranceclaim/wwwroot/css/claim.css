@@ -3,6 +3,10 @@
     font-family: 'Inter', sans-serif;
 }
 
+#claim-content {
+    padding-left: 450px;
+}
+
 .claim-header {
     font-size: 2.5rem;
     font-weight: 700;
@@ -72,7 +76,11 @@
     background-color: #28a745;
 }
 
+
 .status-rejected {
+    background-color: #dc3545;
+}
+.status-cancelled {
     background-color: #dc3545;
 }
 

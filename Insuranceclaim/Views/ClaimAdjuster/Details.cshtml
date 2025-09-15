@@ -33,11 +33,10 @@
             background-color: var(--secondary-color);
             font-family: 'Poppins', sans-serif;
             color: var(--text-light);
-            /* padding: 20px; */
         }
 
         .navbar {
-            background-color: var(--primary-color);
+            background-image: linear-gradient(to right, #4d657e, #344f6c,#344f6c, #012347);
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
@@ -68,7 +67,7 @@
 
         h2 {
             font-weight: 600;
-            color: var(--primary-color);
+            color: #012347;
             text-align: center;
             margin-bottom: 2rem;
         }
@@ -99,6 +98,10 @@
             border-radius: 8px;
             border-color: var(--border-color);
             padding: 0.75rem 1rem;
+        }
+
+        #claim-status {
+            width: auto;
         }
 
         .btn-primary {
@@ -158,8 +161,6 @@
             color: #333 !important;
         }
 
-        /* Reduced spacing for form elements */
-
         .mb-4 {
             margin-bottom: 1rem !important;
         }
@@ -169,35 +170,59 @@
         }
 
         .view-document-btn {
-            background-color: #007bff; /* Primary blue color */
-            color: #fff; /* White text */
+            background-color: #007bff;
+            color: #fff;
             border: none;
-            border-radius: 5px; /* Rounded corners */
-            padding: 10px 15px; /* Spacing inside the button */
+            border-radius: 5px;
+            padding: 10px 15px;
             font-size: 16px;
-            cursor: pointer; /* Change mouse cursor to a pointer on hover */
-            transition: background-color 0.3s ease, transform 0.1s ease; /* Smooth hover and active effects */
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.1s ease;
             text-align: center;
-            text-decoration: none; /* In case it's styled as a link */
+            text-decoration: none;
             display: inline-block;
-            margin-top: 5px; /* Add some space from the label */
+            margin-top: 5px;
         }
 
-            /* Hover effect */
             .view-document-btn:hover {
-                background-color: #0056b3; /* Darker blue on hover */
+                background-color: #0056b3;
             }
 
-            /* Active (click) effect */
             .view-document-btn:active {
-                transform: translateY(1px); /* A slight "press" effect */
+                transform: translateY(1px);
+            }
+
+        textarea[readonly] {
+            background-color: #f8f9fa;
+            border-color: #e0e6ed;
+            cursor: default;
+        }
+
+            /* This is the key fix for the hover state */
+
+            textarea[readonly]:hover {
+                background-color: #f8f9fa;
+                border-color: #e0e6ed;
+            }
+
+            /* This is the key fix for the click/focus state */
+
+            textarea[readonly]:focus {
+                background-color: #f8f9fa;
+                border-color: #e0e6ed;
+                box-shadow: none; /* Removes the blue glow/shadow */
+
+                outline: none; /* Removes the default outline */
             }
     </style>
 </head>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark mb-4">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">Claim Adjuster Portal</a>
+        <div class="container-fluid d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <img src="https://cdn-icons-png.flaticon.com/128/2966/2966486.png" style="width:30px; height:30px" alt="Claim Adjuster Logo" />
+                <a class="navbar-brand ms-2" href="#">Claim Adjuster Portal</a>
+            </div>
             <a href="@Url.Action("Index", "Home")" class="logout-btn">
                 <i class="fas fa-sign-out-alt"></i> Logout
             </a>
@@ -205,7 +230,13 @@
     </nav>
 
     <div class="container">
-        <h2 class="mb-4">Claim Details</h2>
+        <h2>Claim Details</h2>
+
+        @{
+
+            bool isEditable = Model.ClaimStatus.ToLower() == "pending";
+
+        }
         <form asp-action="UpdateClaimDetails" asp-route-id="@Model.ClaimId" method="post">
             <input type="hidden" asp-for="ClaimId" />
             <input type="hidden" asp-for="PolicyId" />
@@ -215,6 +246,7 @@
             <input type="hidden" asp-for="DescriptionofIncident" />
 
             @Html.AntiForgeryToken()
+
             <div class="row">
                 <div class="col-md-6 mb-4">
                     <div class="details-label">Policy Holder Name:</div>
@@ -236,7 +268,6 @@
                     <div class="details-value">@Html.DisplayFor(model => model.ClaimDate)</div>
                 </div>
             </div>
-
             <div class="row">
                 <div class="col-md-6 mb-4">
                     <div class="details-label">Current Status:</div>
@@ -287,50 +318,100 @@
                 </div>
             </div>
 
-
-
             <div class="mb-4">
                 <div class="details-label">Description of Incident:</div>
                 <div class="details-value">@Html.DisplayFor(model => model.DescriptionofIncident)</div>
             </div>
 
-
-
             <div class="mb-4">
                 <label asp-for="AdjusterNotes" class="form-label">Adjuster Notes</label>
-<textarea asp-for="AdjusterNotes" class="form-control" rows="4"></textarea>
+
+                @if (isEditable)
+
+                {
+    <textarea asp-for="AdjusterNotes" class="form-control" rows="4"></textarea>
+
+                }
+
+                else
+
+                {
+    <textarea asp-for="AdjusterNotes" class="form-control" rows="4" readonly></textarea>
+
+                }
                 <span asp-validation-for="AdjusterNotes" class="text-danger"></span>
             </div>
             <div class="mb-3">
                 <span class="details-label">Documents:</span>
+
                 @if (Model.Documents != null && Model.Documents.Any())
+
                 {
-                    @foreach (var doc in Model.Documents)
-                    {
-                        <button type="button" class="view-document-btn" onclick="window.open('@doc.DocumentPath', '_blank')">
-                            View Document
-                        </button>
-                    }
+                    <div class="d-flex flex-wrap gap-2">
+
+                        @foreach (var doc in Model.Documents)
+
+                        {
+
+                            @* <a href="@Url.Action("ViewDocument", "ClaimAdjuster", new { documentPath = doc.DocumentPath })" class="view-document-btn" target="_blank">
+
+                                View Document
+</a> *@
+                            <button type="button" class="view-document-btn" onclick="window.open('@doc.DocumentPath', '_blank')">
+
+                                View Document
+                            </button>
+
+                        }
+                    </div>
+
                 }
+
                 else
+
                 {
                     <p>No documents attached.</p>
+
                 }
             </div>
+
             <div class="col-md-6 mb-4">
                 <div class="mb-4">
                     <label asp-for="ClaimStatus" class="form-label">Update Status</label>
-                    <select asp-for="ClaimStatus" class="form-select">
-                        <option value="pending admin review">Pending Admin Review</option>
-                        <option value="Rejected">Rejected</option>
-                    </select>
+                    <div class="col-md-6 mb-4">
+                        <div class="mb-4">
+
+                            @* <label asp-for="ClaimStatus" class="form-label">Update Status</label> *@
+
+                            @if (isEditable)
+
+                            {
+                                <select asp-for="ClaimStatus" class="form-select" id="claim-status" style="width: 500px">
+                                    <option value="pending admin review">Pending Admin Review</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+
+                            }
+
+                            else
+
+                            {
+                                <select asp-for="ClaimStatus" id="claim-status" class="form-select" disabled>
+                                    <option value="pending admin review">Pending Admin Review</option>
+                                    <option value="Rejected">Rejected</option>
+                                </select>
+
+                            }
+                            <span asp-validation-for="ClaimStatus" class="text-danger"></span>
+                        </div>
+                    </div>
                     <span asp-validation-for="ClaimStatus" class="text-danger"></span>
                 </div>
             </div>
 
             <div class="d-flex justify-content-between mt-4">
                 <a asp-action="Index" class="btn btn-secondary btn-back">Back to List</a>
-                <button type="submit" class="btn btn-primary" id="save-button">Save Changes</button>
+                <button type="submit" class="btn btn-primary" id="save-button" @(isEditable ? "" : "disabled")>Save Changes</button>
             </div>
         </form>
         <div id="status-message" class="mt-3"></div>
@@ -341,21 +422,25 @@
 
         $(document).ready(function () {
 
-            // A flag to ensure the form is submitted only once.
-
             var isFormSubmitted = false;
 
             var saveButton = $('#save-button');
 
             var form = $('form');
 
-            var formInputs = form.find('input, select, textarea, button').not(saveButton);
+            var formInputs = form.find('input, select, textarea').not(saveButton);
+
+            // Disable the Save Changes button initially if the form is not editable
+
+            if (!@isEditable.ToString().ToLower()) {
+
+                saveButton.prop('disabled', true);
+
+            }
 
             form.submit(function (e) {
 
                 e.preventDefault();
-
-                // Check if the form has already been submitted.
 
                 if (isFormSubmitted) {
 
@@ -363,11 +448,7 @@
 
                 }
 
-                // Set the flag to true to prevent future submissions.
-
                 isFormSubmitted = true;
-
-                // Show loading state on the button
 
                 saveButton.prop('disabled', true).html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...');
 
@@ -389,21 +470,29 @@
 
                             statusMessage.removeClass('text-danger').addClass('text-success').text(response.message);
 
-                            // Permanently change the button and disable the form
-
                             saveButton.html('<i class="fas fa-check"></i> Saved');
 
                             formInputs.prop('disabled', true);
+
+                            // Check if this window was opened from another window and if it's still open
+
+                            if (window.opener && !window.opener.closed) {
+
+                                var updatedClaimId = @Model.ClaimId;
+
+                                var newStatus = $('[name="ClaimStatus"]').val();
+
+                                // Call the update function on the opener window
+
+                                window.opener.updateClaimStatus(updatedClaimId, newStatus);
+
+                            }
 
                         } else {
 
                             statusMessage.removeClass('text-success').addClass('text-danger').text(response.message);
 
-                            // Revert button state on error
-
                             saveButton.prop('disabled', false).html('Save Changes');
-
-                            // Allow the form to be submitted again in case of an error
 
                             isFormSubmitted = false;
 
@@ -415,11 +504,7 @@
 
                         $('#status-message').removeClass('text-success').addClass('text-danger').text("An error occurred while saving changes.");
 
-                        // Revert button state on error
-
                         saveButton.prop('disabled', false).html('Save Changes');
-
-                        // Allow the form to be submitted again in case of an error
 
                         isFormSubmitted = false;
 

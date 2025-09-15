@@ -29,9 +29,17 @@
                             <span>Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span><br>
                             <span>Enrolled <span class="float-end text-muted">@policy.CreatedDate</span></span>
                         </div>
-                        <button class="btn btn-enroll mt-auto pt-3" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
-                            <i class="fas fa-plus me-2"></i> Submit Claim
-                        </button>
+                       
+                            @if (policy.PolicyStatus == "Expired")
+                            {
+                                <button class="btn btn-already-enrolled">Polciy Expired</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-enroll mt-auto pt-3" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
+                                    <i class="fas fa-plus me-2"></i> Submit Claim
+                                </button>
+                            }
                     </div>
                 </div>
             }

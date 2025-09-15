@@ -138,11 +138,11 @@
     <div class="row mb-3 align-items-center">
         <div class="col-md-4">
             <form method="get" asp-action="Index">
-                <select class="form-select" name="roleFilter" onchange="this.form.submit()">
-                    <option value="" selected="@(string.IsNullOrEmpty(ViewBag.roleFilter))">All Roles</option>
-                    <option value="Agent" selected="@(ViewBag.roleFilter == "Agent")">Agent</option>
-                    <option value="Claim Adjuster" selected="@(ViewBag.roleFilter == "Claim Adjuster")">Claim Adjuster</option>
-                    <option value="POLICY HOLDER" selected="@(ViewBag.roleFilter == "POLICY HOLDER")">POLICY HOLDER</option>
+                <select data-filter-select class="form-select w-auto rounded-md">
+                    <!option value="All" @(ViewData["CurrentFilter"]?.ToString() == "All" ? "selected" : "")>All Claims</!option>
+                    <!option value="Pending Admin Review" @(ViewData["CurrentFilter"]?.ToString() == "Pending Admin Review" ? "selected" : "")>Pending Admin Review</!option>
+                    <!option value="Rejected" @(ViewData["CurrentFilter"]?.ToString() == "Rejected" ? "selected" : "")>Rejected</!option>
+                    <!option value="Approved" @(ViewData["CurrentFilter"]?.ToString() == "Approved" ? "selected" : "")>Approved</!option>
                 </select>
             </form>
         </div>
@@ -346,6 +346,12 @@
             confirmDeleteButton.href = '/Admin/AdminUsers/Delete/' + userId;
 
         });
+
+            // Add this new section for filtering
+            $('[data-filter-select]').on('change', function () {
+                var selectedStatus = $(this).val();
+                window.location.href = '@Url.Action("Index", "AdminClaims")' + '?status=' + selectedStatus;
+            });
     </script>
 
 }

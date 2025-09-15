@@ -20,14 +20,22 @@
 
         .sidebar {
             width: 250px;
-            background-color: #ffffff;
+            background-image: linear-gradient(to bottom, #4d657e, #344f6c, #012347);
             padding: 20px;
+            margin-top: 15px;
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+            border-radius: 0px 10px 10px 0px;
+            position: fixed;
+            top: 50px; /* Adjust this value based on the header's height */
+            left: 0;
+            height: calc(100vh - 50px); /* Adjust to fill remaining viewport height */
+            overflow-y: auto; /* Adds a scrollbar if content exceeds height */
+            z-index: 999;
         }
 
             .sidebar h2 {
                 font-size: 1.2rem;
-                color: #333;
+                color: #fff;
                 margin-bottom: 30px;
             }
 
@@ -43,7 +51,8 @@
             .sidebar a {
                 display: block;
                 padding: 10px;
-                color: #555;
+                
+                color:#fff;
                 text-decoration: none;
                 border-radius: 5px;
                 transition: background-color 0.3s;
@@ -51,33 +60,48 @@
 
                 .sidebar a.active {
                     background-color: #e6f7ff;
-                    color: #007bff;
+                    color:black;
                     font-weight: bold;
                 }
 
                 .sidebar a:hover:not(.active) {
                     background-color: #f0f0f0;
                 }
+                .sidebar a:hover{
+                    color:black;
+                }
 
         .main-content {
             flex-grow: 1;
             padding: 20px;
             background-color: #f4f7f9;
+            margin-top: 20px; /* Same as header's height */
+            margin-left: 250px;
         }
 
         .header {
-            background-color: #007bff;
+            background-image: linear-gradient(to right, #4d657e, #344f6c, #012347);
             color: #ffffff;
-            padding: 15px 20px;
+            padding: 10px 10px;
             display: flex;
-            justify-content: space-between;
+            flex-wrap: inherit;
             align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000; /* Ensures it stays on top of other content */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-            .header h1 {
-                font-size: 1.5rem;
+
+            /* .header h1 {
+                font-size: 1.2rem;
                 margin: 0;
-            }
+                font-weight:bold;
+            } */
 
         .logout-btn {
             background-color: transparent;
@@ -132,8 +156,13 @@
 <body>
 
     <div class="header">
-        <h1>Admin Dashboard</h1>
+        <a class="navbar-brand d-flex aligned-tems-center ">
+        <img src="https://cdn-icons-png.flaticon.com/128/2966/2966486.png" style="width:30px; height:30px" /> &nbsp; &nbsp;
+        <span class="logo text-white">Admin Dashboard</span>
+        </a>
+        <span>
         <a href="@Url.Action("Index", "Home")" class="logout-btn">Logout</a>
+        </span>
     </div>
 
     <div class="dashboard-container">

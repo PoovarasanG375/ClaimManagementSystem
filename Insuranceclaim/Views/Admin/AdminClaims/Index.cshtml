@@ -19,13 +19,15 @@
         </div>
 
         <div class="mb-4">
-            <select data-filter-select class="form-select w-auto rounded-md">
-                <option value="All">All Claims</option>
-                <option value="Pending">Pending</option>
-                <option value="Pending Admin Review" selected>Pending_Admin_Review</option>
-                <option value="Rejected">Rejected</option>
-                <option value="Approved">Approved</option>
-            </select>
+            <form asp-controller="AdminClaims" asp-action="Index" method="get" class="d-inline-block">
+                <select id="statusFilter" name="status" class="form-select w-auto rounded-md" data-selected="@(ViewBag.SelectedStatus ?? "Pending Admin Review")" onchange="this.form.submit()">
+                    <option value="All">All Claims</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Pending Admin Review">Pending Admin Review</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Approved">Approved</option>
+                </select>
+            </form>
         </div>
 
         @if (Model != null && Model.Any())
@@ -84,7 +86,7 @@
         {
             <div class="alert alert-info text-center">
 
-                No claims found with the status 'Pending_Admin_Review'.
+                No claims found with the selected status.
             </div>
 
         }
@@ -139,6 +141,13 @@
     <script>
 
         $(document).ready(function () {
+
+            // set selected option based on data-selected attribute
+            var sel = $('#statusFilter');
+            var selected = sel.data('selected');
+            if (selected) {
+                sel.val(selected);
+            }
 
             var currentClaimId;
 

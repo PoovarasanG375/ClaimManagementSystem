@@ -15,13 +15,14 @@ body {
 }
 
 .header {
-    background-color: #ffffff;
+    background-image: linear-gradient(to right, #4d657e, #344f6c, #012347);
     border-bottom: 1px solid #e0e0e0;
     padding: 15px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-shrink: 0;
+
 }
 
     .header .logo-section {
@@ -60,27 +61,55 @@ body {
     overflow: hidden;
 }
 
-.sidebar {
-    width: 260px;
-    flex-shrink: 0;
-    background-color: #ffffff;
-    border-right: 1px solid #e0e0e0;
-    padding: 20px;
+.navbar {
+    background-image: linear-gradient(to right, #4d657e, #344f6c, #012347);
 }
 
-    .sidebar .nav-link {
+.sidebar {
+    width: 260px;
+    height: auto;
+    flex-shrink: 0;
+    background-image: linear-gradient(to bottom, #4d657e, #344f6c, #012347);
+    border-right: 1px solid #e0e0e0;
+    padding: 20px;
+    margin-top:2px;
+    border-radius: 0px 10px 10px 0px;
+}
+
+    .sidebar h2 {
+        font-size: 1.2rem;
         color: #333;
-        padding: 12px 20px;
-        font-size: 1.05rem;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        border-radius: 6px;
-        margin-bottom: 5px;
+        margin-bottom: 30px;
+    }
+
+    .sidebar ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .sidebar li {
+        margin-bottom: 10px;
+    }
+
+    .sidebar .nav-link {
+        display: block;
+        padding: 10px;
+        color: #ffffff;
+        text-decoration: none;
+        border-radius: 10px;
+        transition: background-color 0.3s;
     }
 
         .sidebar .nav-link.active {
-            color: #0d6efd;
-            background-color: #e0f0ff;
+            background-color: #e6f7ff;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .sidebar .nav-link:hover:not(.active) {
+            background-color: #f0f0f0;
+            color: slategray;
+            font-weight: bold;
         }
 
 .dashboard-content {

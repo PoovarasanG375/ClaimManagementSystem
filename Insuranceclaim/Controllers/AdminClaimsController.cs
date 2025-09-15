@@ -36,23 +36,36 @@ namespace Insuranceclaim.Controllers
 
         // GET: AdminClaim
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string status)
 
         {
+            // Default to Pending Admin Review if no status provided
+            if (string.IsNullOrEmpty(status))
+            {
+                status = "Pending Admin Review";
+            }
 
-            var claims = _context.Claims
-
+            IQueryable<Claim> claimsQuery = _context.Claims
                 .Include(c => c.Adjuster)
-
                 .Include(c => c.Policy)
+                .Include(c => c.User);
 
-                .Include(c => c.User)
+            if (!string.Equals(status, "All", StringComparison.OrdinalIgnoreCase))
+            {
+                // Use the status value directly to filter ClaimStatus
+                claimsQuery = claimsQuery.Where(c => c.ClaimStatus == status);
+            }
+            else
+            {
+                // For All, include everything (optionally you could restrict)
+            }
 
-                .Where(c => c.ClaimStatus == "Pending Admin Review" || c.ClaimStatus == "Approved" || c.ClaimStatus == "Rejected");
+            ViewBag.SelectedStatus = status;
 
-            return View("~/Views/Admin/AdminClaims/Index.cshtml", await claims.ToListAsync());
+            return View("~/Views/Admin/AdminClaims/Index.cshtml", await claimsQuery.ToListAsync());
 
         }
+
 
         // GET: AdminClaim/Details/5
 
