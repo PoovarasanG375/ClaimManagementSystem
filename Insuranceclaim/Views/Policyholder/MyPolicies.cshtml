@@ -115,16 +115,19 @@
         });
 
         // Set max date for the incident date field to yesterday
-        $(function () {
-            var yesterday = new Date();
-            yesterday.setDate(yesterday.getDate() - 1);
+                $(function () {
+            // Get the current date
+            var today = new Date();
 
-            var dd = String(yesterday.getDate()).padStart(2, '0');
-            var mm = String(yesterday.getMonth() + 1).padStart(2, '0');
-            var yyyy = yesterday.getFullYear();
+            // Format the date as YYYY-MM-DD
+            var dd = String(today.getDate()).padStart(2, '0');
+            var mm = String(today.getMonth() + 1).padStart(2, '0'); // January is 0!
+            var yyyy = today.getFullYear();
 
-            var yesterdayFormatted = yyyy + '-' + mm + '-' + dd;
-            $('#incidentDate').attr('max', yesterdayFormatted);
+            var todayFormatted = yyyy + '-' + mm + '-' + dd;
+
+            // Set the max attribute of the input field to today's date
+            $('#incidentDate').attr('max', todayFormatted);
         });
     </script>
 }

@@ -38,9 +38,6 @@ namespace Insuranceclaim.Controllers
 
         {
 
-            // The Include(c => c.User) line in the original code caused the error.
-
-            // Assuming the `User` model is correctly linked, this code will now work.
 
             var claimManagementSystemContext = _context.Claims
 
@@ -48,7 +45,7 @@ namespace Insuranceclaim.Controllers
 
                 .Include(c => c.Policy)
 
-                .Include(c => c.User); // This now works because the namespace is included.
+                .Include(c => c.User);
 
             return View(await claimManagementSystemContext.ToListAsync());
 

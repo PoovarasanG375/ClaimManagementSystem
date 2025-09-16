@@ -30,11 +30,11 @@ namespace Insuranceclaim.Controllers
             if (user != null)
             {
                 var claims = new List<Claim>
-{
-            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
-     new Claim(ClaimTypes.Name, user.Username),
-     new Claim(ClaimTypes.Role, user.Role)
-};
+                {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+                new Claim(ClaimTypes.Name, user.Username),
+                new Claim(ClaimTypes.Role, user.Role)
+                };
 
                 var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                 var authProperties = new AuthenticationProperties

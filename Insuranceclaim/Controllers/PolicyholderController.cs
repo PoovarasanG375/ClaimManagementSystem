@@ -22,7 +22,6 @@ namespace Insuranceclaim.Controllers
             return RedirectToAction("AvailablePolicies");
         }
 
-        // ... other code ...
         [HttpGet]
         public IActionResult AvailablePolicies()
         {
@@ -42,12 +41,16 @@ namespace Insuranceclaim.Controllers
             // Determine policy status based on AppliedPolicies.EnrollementStatus and Policy.PolicyStatus
             foreach (var policy in allPolicies)
             {
-                // New logic: Check if the policy is marked INACTIVE
+                // New logic: Check if the policy is marked INACTIVE or CANCELLED
                 var adminPolicy = _context.Policies.FirstOrDefault(p => p.PolicyId == policy.PolicyId);
-                if (adminPolicy != null && (adminPolicy.PolicyStatus ?? string.Empty).ToLower() == "inactive")
+                if (adminPolicy != null)
                 {
-                    policy.PolicyStatus = "INACTIVE"; // Show as INACTIVE
-                    continue; // Skip other checks as enrollment is not allowed
+                    string status = (adminPolicy.PolicyStatus ?? string.Empty).ToLower();
+                    if (status == "inactive" || status == "cancelled")
+                    {
+                        policy.PolicyStatus = adminPolicy.PolicyStatus; // Use the exact status from the database
+                        continue; // Skip other checks as enrollment is not allowed
+                    }
                 }
 
                 var applied = appliedPolicies.FirstOrDefault(ap => ap.PolicyId == policy.PolicyId);
@@ -244,6 +247,7 @@ namespace Insuranceclaim.Controllers
             TempData["SuccessMessage"] = "Claim amount restored to your policy. You can resubmit from My Policies.";
             return RedirectToAction("MyPolicies");
         }
+
         [HttpPost]
         public IActionResult EnrollPolicy(int policyId)
         {
@@ -260,28 +264,26 @@ namespace Insuranceclaim.Controllers
 
             var appliedPolicy = _context.AppliedPolicies.FirstOrDefault(ap => ap.UserId == userId && ap.PolicyId == policyId);
 
-            if (appliedPolicy != null && (appliedPolicy.EnrollementStatus == "Enrolled" || appliedPolicy.EnrollementStatus == "Submitted for claim"))
+            // New logic: Check if the policy is currently "Enrolled" or "Submitted for claim" and has remaining coverage.
+            // If so, redirect back as enrollment is not needed.
+            if (appliedPolicy != null && (appliedPolicy.EnrollementStatus == "Enrolled" || appliedPolicy.EnrollementStatus == "Submitted for claim") && appliedPolicy.Remainingamount > 0)
             {
-                return RedirectToAction("AvailablePolicies");
-            }
-            if (appliedPolicy != null && appliedPolicy.Remainingamount > 0)
-            {
+                TempData["ErrorMessage"] = "You are already enrolled in this policy.";
                 return RedirectToAction("AvailablePolicies");
             }
 
+            // This section handles both new enrollments and re-enrollments of Expired/Claimed policies.
             if (appliedPolicy != null)
             {
+                // For existing applied policies that are "Expired" or "Claimed" with no remaining amount, update them.
                 appliedPolicy.EnrollementStatus = "Enrolled";
                 appliedPolicy.CreatedDate = DateOnly.FromDateTime(DateTime.Now);
-                // initialize Remainingamount if null
-                if (appliedPolicy.Remainingamount == null || appliedPolicy.Remainingamount <= 0)
-                {
-                    appliedPolicy.Remainingamount = policy.CoverageAmount;
-                }
+                appliedPolicy.Remainingamount = policy.CoverageAmount; // Reset to full coverage
                 _context.AppliedPolicies.Update(appliedPolicy);
             }
             else
             {
+                // For brand new enrollments (no AppliedPolicy record exists yet).
                 var newAppliedPolicy = new AppliedPolicy
                 {
                     UserId = userId,
@@ -290,15 +292,12 @@ namespace Insuranceclaim.Controllers
                     CreatedDate = DateOnly.FromDateTime(DateTime.Now),
                     Remainingamount = policy.CoverageAmount
                 };
-
                 _context.AppliedPolicies.Add(newAppliedPolicy);
             }
 
             _context.SaveChanges();
-
             return RedirectToAction("MyPolicies");
         }
-
         [HttpPost]
         public IActionResult SubmitClaim(int policyId, decimal claimAmount, DateOnly incidentDate, string incidentDescription, IFormFile claimFile)
         {

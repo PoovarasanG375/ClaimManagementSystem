@@ -58,7 +58,7 @@
                                     <td>@claim.Policy?.PolicyName</td>
                                     <td>₹@claim.ClaimAmount?.ToString("N0")</td>
                                     <td>@claim.IncidentDate?.ToString("yyyy-MM-dd")</td>
-                                    <td><span class="badge @statusBadgeClass  text-black">@claim.ClaimStatus</span></td>
+                                    <td><span class="badge @statusBadgeClass">@claim.ClaimStatus</span></td>
                                     <td>
                                         <button type="button" class="btn btn-outline-primary btn-sm view-details" data-claim-id="@claim.ClaimId" data-bs-toggle="modal" data-bs-target="#claimDetailsModal">
                                             <i class="bi bi-eye"></i> Details
