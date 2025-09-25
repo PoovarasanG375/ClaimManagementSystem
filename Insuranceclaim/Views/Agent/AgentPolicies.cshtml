@@ -1,0 +1,406 @@
+﻿@model List<Insuranceclaim.Models.Policy>
+@{
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
+    ViewData["Title"] = "Available Policies";
+    ViewBag.Page = "AvailablePolicies";
+}
+
+<style>
+    /* Custom styles for the improved modal design */
+    .modal-content.custom-design {
+        border-radius: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+
+    .modal-header.custom-design {
+        border-bottom: none;
+        padding-bottom: 0;
+        text-align: center;
+        position: relative;
+    }
+
+        .modal-header.custom-design .btn-close {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+
+        .modal-header.custom-design .modal-title {
+            font-weight: 600;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+    .modal-body.custom-design {
+        padding: 20px 25px;
+        position: relative; /* For content positioning */
+    }
+
+    .policy-info-box {
+        background-color: #f0f8ff; /* Light blue background */
+        border: 1px solid #cce5ff;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: #004085;
+    }
+
+        .policy-info-box strong {
+            color: #007bff;
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: 5px;
+        }
+
+    .payment-option-group {
+        display: none;
+        padding-top: 15px;
+    }
+
+    .payment-option {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 15px;
+        margin-bottom: 10px;
+        border: 1px solid #dee2e6;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+        gap: 15px;
+    }
+
+        .payment-option:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-option.active {
+            border-color: #007bff;
+            background-color: #e6f2ff; /* Light blue active state */
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+    .payment-option-text {
+        font-weight: 500;
+        color: #333;
+        flex-grow: 1;
+    }
+    /* Style for Bootstrap Icons */
+    .payment-option i {
+        font-size: 1.8rem;
+        color: #6c757d; /* A neutral icon color */
+    }
+
+    .modal-footer.custom-design {
+        border-top: none;
+        padding: 0 25px 25px 25px;
+    }
+
+    .btn-pay-now {
+        font-size: 1.2rem;
+        padding: 12px;
+        display: none;
+        font-weight: 600;
+    }
+
+    .card-input-group {
+        display: flex;
+        gap: 10px;
+    }
+
+        .card-input-group .form-control {
+            flex: 1;
+        }
+
+    .form-group label {
+        font-weight: 500;
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        border-radius: 6px;
+    }
+
+    /* Success message container */
+    #paymentSuccessContainer {
+        display: none; /* Initially hidden */
+        text-align: center;
+        padding: 40px 0;
+    }
+
+        #paymentSuccessContainer .checkmark {
+            font-size: 4rem;
+            color: #28a745;
+            margin-bottom: 15px;
+        }
+
+        #paymentSuccessContainer h4 {
+            font-weight: 600;
+            color: #28a745;
+        }
+
+        #paymentSuccessContainer p {
+            color: #6c757d;
+            margin-bottom: 25px;
+        }
+</style>
+
+<div class="container-fluid">
+    <h2>Available Policies</h2>
+    <p class="lead-text">Choose from our comprehensive insurance policies</p>
+
+    <div id="policy-cards-container">
+        @{
+            var categorizedPolicies = new Dictionary<string, List<Insuranceclaim.Models.Policy>>();
+            var accidentalPolicies = new List<Insuranceclaim.Models.Policy>();
+            var seniorCarePolicies = new List<Insuranceclaim.Models.Policy>();
+            var lifeInsurancePolicies = new List<Insuranceclaim.Models.Policy>();
+            var otherPolicies = new List<Insuranceclaim.Models.Policy>();
+
+            foreach (var policy in Model)
+            {
+                if (policy.PolicyName.Contains("Accidental", StringComparison.OrdinalIgnoreCase))
+                {
+                    accidentalPolicies.Add(policy);
+                }
+                else if (policy.PolicyName.Contains("Senior", StringComparison.OrdinalIgnoreCase))
+                {
+                    seniorCarePolicies.Add(policy);
+                }
+                else if (policy.PolicyName.Contains("Life", StringComparison.OrdinalIgnoreCase))
+                {
+                    lifeInsurancePolicies.Add(policy);
+                }
+                else
+                {
+                    otherPolicies.Add(policy);
+                }
+            }
+
+            if (accidentalPolicies.Any())
+                categorizedPolicies.Add("Accidental Policy", accidentalPolicies);
+            if (seniorCarePolicies.Any())
+                categorizedPolicies.Add("Senior Care Policy", seniorCarePolicies);
+            if (lifeInsurancePolicies.Any())
+                categorizedPolicies.Add("Life Insurance Policy", lifeInsurancePolicies);
+            if (otherPolicies.Any())
+                categorizedPolicies.Add("Other Policies", otherPolicies);
+        }
+
+        @foreach (var category in categorizedPolicies)
+        {
+            <div class="policy-category">
+                <h3 class="mt-4">@category.Key</h3>
+                <div class="row">
+                    @foreach (var policy in category.Value)
+                    {
+                        <div class="col-12 col-md-6 col-lg-4 mb-4">
+                            <div class="card-policy h-100 d-flex flex-column">
+                                <div>
+                                    <div class="policy-title">@policy.PolicyName</div>
+                                    <span class="policy-tag">@policy.PolicyName?.Split(' ')[0]</span>
+                                    <div class="details mt-3">
+                                        <span>Coverage <span class="float-end currency">@policy.CoverageAmount?.ToString("C0")</span></span>
+                                        <span>Annual Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span>
+                                    </div>
+                                    <div class="description mt-3">
+                                        @policy.Description
+                                    </div>
+                                </div>
+
+                                <div class="mt-auto pt-3">
+                                    @if (policy.PolicyStatus == "Enrolled" || policy.PolicyStatus == "Submitted for claim")
+                                    {
+                                        <button class="btn btn-already-enrolled w-100">Already Enrolled</button>
+                                    }
+                                    else if (policy.PolicyStatus == "INACTIVE")
+                                    {
+                                        <button class="btn btn-already-enrolled w-100">@policy.PolicyStatus</button>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-enroll w-100"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#enrollmentPaymentModal"
+                                                data-policy-id="@policy.PolicyId"
+                                                data-policy-title="@policy.PolicyName"
+                                                data-policy-premium="@policy.AnnualPremium?.ToString("C0")">
+                                            Enroll Now
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="modal fade" id="enrollmentPaymentModal" tabindex="-1" aria-labelledby="enrollmentPaymentModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-md">
+            <div class="modal-content custom-design">
+                <div class="modal-header custom-design">
+                    <h5 class="modal-title" id="enrollmentPaymentModalLabel">Pay Premium</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body custom-design">
+                    <div id="payment-content">
+                        <div class="policy-info-box">
+                            <strong><span id="modal-policy-title"></span></strong>
+                            Total Premium: <span id="modal-premium-amount"></span>
+                        </div>
+
+                        <div id="main-options-container">
+                            <div class="payment-option" data-method="upi">
+                                <i class="bi bi-qr-code"></i>
+                                <div class="payment-option-text">Pay via UPI</div>
+                            </div>
+                            <div class="payment-option" data-method="cards">
+                                <i class="bi bi-credit-card"></i>
+                                <div class="payment-option-text">Credit / Debit Card</div>
+                            </div>
+                        </div>
+
+                        <div id="upi-options" class="payment-option-group">
+                            <h6 class="text-muted">Choose your UPI app</h6>
+                            <div class="payment-option" data-method="gpay">
+                                <i class="bi bi-google"></i>
+                                <div class="payment-option-text">Google Pay</div>
+                            </div>
+                            <div class="payment-option" data-method="phonepe">
+                                <i class="bi bi-phone"></i>
+                                <div class="payment-option-text">PhonePe</div>
+                            </div>
+                        </div>
+
+                        <div id="cards-form" class="payment-option-group">
+                            <h6 class="text-muted">Enter Card Details</h6>
+                            <div class="form-group mb-3">
+                                <label for="cardNumber">Card Number</label>
+                                <input type="text" class="form-control" id="cardNumber" name="cardNumber" placeholder="0000 0000 0000 0000" required />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="paymentSuccessContainer">
+                        <span class="checkmark">✅</span>
+                        <h4>Payment Successful!</h4>
+                        <p>Your enrollment has been processed.</p>
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Done</button>
+                    </div>
+
+                </div>
+                <div class="modal-footer custom-design">
+                    <button type="button" class="btn btn-primary btn-pay-now w-100" id="final-pay-btn">Pay Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            const modal = $('#enrollmentPaymentModal');
+            const payContent = $('#payment-content');
+            const successContainer = $('#paymentSuccessContainer');
+            const finalPayBtn = $('#final-pay-btn');
+
+            // Grab the target user id passed from controller
+            const targetUserId = '@(ViewBag.TargetUserId ?? 0)';
+
+            // Handle modal open
+            $('#policy-cards-container').on('click', '.btn-enroll', function() {
+                const policyTitle = $(this).data('policy-title');
+                const policyId = $(this).data('policy-id');
+                const policyPremium = $(this).data('policy-premium');
+
+                $('#modal-policy-title').text(policyTitle);
+                $('#modal-premium-amount').text(policyPremium);
+
+                modal.data('policy-id', policyId);
+
+                // Reset to initial state
+                $('.payment-option').removeClass('active');
+                $('.payment-option-group').hide();
+                finalPayBtn.hide();
+                payContent.show();
+                successContainer.hide();
+                $('#main-options-container').show();
+            });
+
+            // Handle main payment option selection (UPI or Cards)
+            $('#main-options-container .payment-option').on('click', function() {
+                $('.payment-option').removeClass('active');
+                $(this).addClass('active');
+
+                const selectedMethod = $(this).data('method');
+                $('.payment-option-group').hide(); // Hide all sub-options
+
+                if (selectedMethod === 'upi') {
+                    $('#upi-options').show();
+                    finalPayBtn.hide(); // Hide pay button until a sub-option is selected
+                } else if (selectedMethod === 'cards') {
+                    $('#cards-form').show();
+                    finalPayBtn.show().text(`Pay ${$('#modal-premium-amount').text()}`);
+                }
+            });
+
+            // Handle sub-payment option selection (GPay/PhonePe)
+            $('#upi-options .payment-option').on('click', function() {
+                $('#upi-options .payment-option').removeClass('active');
+                $(this).addClass('active');
+                finalPayBtn.show().text(`Pay ${$('#modal-premium-amount').text()}`);
+            });
+
+            // The corrected part: Use AJAX to call the controller, including targetUserId when present
+            finalPayBtn.on('click', function() {
+                const selectedMethod = $('.payment-option.active').data('method');
+                const policyId = modal.data('policy-id');
+                const premiumAmount = $('#modal-premium-amount').text();
+
+                // Simple validation for card number
+                if (selectedMethod === 'cards' && $('#cardNumber').val().trim() === '') {
+                    alert("Please enter a card number to proceed.");
+                    return;
+                }
+
+                // Show the success message immediately
+                payContent.hide();
+                finalPayBtn.hide();
+                successContainer.show();
+
+                // Now, send an AJAX request to your controller to actually enroll the policy
+                $.ajax({
+                    url: '@Url.Action("EnrollPolicy", "AgentPolicies")',
+                    type: 'POST',
+                    data: { policyId: policyId, targetUserId: targetUserId },
+                    success: function(response) {
+                        console.log("Enrollment successful on the server.");
+                        // The modal's 'hidden.bs.modal' event will handle the reload
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle errors, e.g., show an error message
+                        console.error("Enrollment failed:", error);
+                        alert("Enrollment failed. Please try again.");
+                        // Revert the UI to allow the user to try again
+                        payContent.show();
+                        successContainer.hide();
+                        finalPayBtn.show();
+                    }
+                });
+            });
+
+            // Handle modal closing
+            modal.on('hidden.bs.modal', function () {
+                // When the modal closes, reload the page to reflect the new policy status
+                location.reload();
+            });
+        });
+    </script>
+}

@@ -1,0 +1,132 @@
+﻿@model List<Insuranceclaim.Models.Policy>
+@{
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
+    ViewData["Title"] = "My Policies";
+    ViewBag.Page = "MyPolicies";
+}
+<div class="container-fluid">
+    <h2>My Policies</h2>
+    <p class="lead-text">Manage your enrolled insurance policies</p>
+
+    <div id="my-policies-container" class="row">
+        @if (!Model.Any())
+        {
+            <div class="col-12"><p class="text-muted">You have no policies enrolled yet.</p></div>
+        }
+        else
+        {
+            foreach (var policy in Model)
+            {
+                <div class="col-12 col-md-6 col-lg-4 mb-4">
+                    <div class="card-policy h-100 d-flex flex-column">
+                        <div class="d-flex flex-column align-items-center mb-2" style="gap: 8px;">
+                            <div class="policy-title w-100 text-center">@policy.PolicyName</div>
+                            <span class="badge bg-primary px-3 py-2 rounded-pill" style="font-size: 0.85rem;">@policy.PolicyStatus</span>
+                        </div>
+                        <div class="details mt-3">
+                            <span>Policy Number <span class="float-end text-muted">@policy.PolicyNumber</span></span><br>
+                            <span>Coverage <span class="float-end currency">@policy.CoverageAmount?.ToString("C0")</span></span><br>
+                            <span>Premium <span class="float-end currency">@policy.AnnualPremium?.ToString("C0")</span></span><br>
+                            <span>Enrolled <span class="float-end text-muted">@policy.CreatedDate</span></span>
+                        </div>
+                       
+                            @if (policy.PolicyStatus == "Expired")
+                            {
+                                <button class="btn btn-already-enrolled">Polciy Expired</button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-enroll mt-auto pt-3" data-bs-toggle="modal" data-bs-target="#uploadModal" data-policy-id="@policy.PolicyId" data-policy-title="@policy.PolicyName">
+                                    <i class="fas fa-plus me-2"></i> Submit Claim
+                                </button>
+                            }
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form id="claimForm" asp-controller="AgentPolicies" asp-action="SubmitClaim" method="post" enctype="multipart/form-data" class="modal-content">
+            <input type="hidden" id="claim-policy-id" name="policyId">
+            <input type="hidden" name="targetUserId" value="@ViewBag.TargetUserId" />
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Submit Claim</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="claimAmount" class="form-label">Claim Amount (₹)</label>
+                    <input type="number" class="form-control" id="claimAmount" name="claimAmount" placeholder="e.g., 50000" required>
+                </div>
+                <div class="mb-3">
+                    <label for="incidentDate" class="form-label">Date of Incident</label>
+                    <input type="date" class="form-control" id="incidentDate" name="incidentDate" required>
+                </div>
+                <div class="mb-3">
+                    <label for="incidentDescription" class="form-label">Description of Incident</label>
+                    <textarea class="form-control" id="incidentDescription" name="incidentDescription" rows="3" placeholder="Describe what happened..." required></textarea>
+                </div>
+                <div class="mb-3">
+                    <label for="claimFile" class="form-label">Upload Supporting Document</label>
+                    <input type="file" class="form-control" id="claimFile" name="claimFile" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Submit Claim</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+    <script>
+        // Display Toastr messages from TempData
+        toastr.options.positionClass = 'toast-top-center';
+        toastr.options.customClassName = 'larger-toastr'; // Set the custom class here
+
+        $(document).ready(function() {
+            @if (TempData["SuccessMessage"] != null)
+            {
+                            <text>
+                                toastr.success('@Html.Raw(TempData["SuccessMessage"])');
+                            </text>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                            <text>
+                                toastr.error('@Html.Raw(TempData["ErrorMessage"])');
+                            </text>
+            }
+        });
+
+        // Handle claim submission modal dynamic content
+        $('#uploadModal').on('show.bs.modal', function (e) {
+            const button = $(e.relatedTarget);
+            const policyId = button.data('policy-id');
+            const policyTitle = button.data('policy-title');
+            const modalTitle = $(this).find('.modal-title');
+            modalTitle.text(`Submit Claim for ${policyTitle}`);
+            $('#claim-policy-id').val(policyId);
+        });
+
+        // Set max date for the incident date field to yesterday
+        $(function () {
+            var yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+
+            var dd = String(yesterday.getDate()).padStart(2, '0');
+            var mm = String(yesterday.getMonth() + 1).padStart(2, '0');
+            var yyyy = yesterday.getFullYear();
+
+            var yesterdayFormatted = yyyy + '-' + mm + '-' + dd;
+            $('#incidentDate').attr('max', yesterdayFormatted);
+        });
+    </script>
+}

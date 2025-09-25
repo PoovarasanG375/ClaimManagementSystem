@@ -1,15 +1,20 @@
 ﻿/* =======================================
+
    Base and Layout Styles (from index.html)
+
    ======================================= */
+
 body {
     font-family: 'Segoe UI', sans-serif;
+    font-family: 'Poppins', sans-serif;
     background-color: white;
     margin: 0;
     padding: 0;
 }
 
 .navbar {
-    background-color: #488AFB;
+    background-image: linear-gradient(to right, #4d657e, #344f6c, #012347);
+    /*    background-color: #488AFB;*/
 }
 
     .navbar .nav-link {
@@ -28,7 +33,7 @@ body {
 }
 
 #main-content {
-    padding-top: 20px;
+    padding-top: 0px;
     animation: fadeIn 0.4s ease-in-out;
 }
 
@@ -36,11 +41,12 @@ footer {
     background-color: #f1f1f1;
     padding: 15px;
     text-align: center;
-    margin-top: 30px;
+    margin-top: 10px;
     color: #555;
 }
 
 @keyframes fadeIn {
+
     from {
         opacity: 0;
     }
@@ -51,17 +57,22 @@ footer {
 }
 
 /* =======================================
+
    Home Page Styles (from home.html)
+
    ======================================= */
+
 .hero-section {
     position: relative;
-    height: 80vh;
+    height: 87vh;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #fff;
+    padding-top: 10px;
+    margin-top: 13px;
     text-align: center;
-    background: #488AFB;
+    background: #4d657e;
     overflow: hidden;
 }
 
@@ -112,6 +123,7 @@ footer {
     }
 
 @keyframes move-shapes {
+
     0% {
         transform: translate(0, 0) rotate(0deg);
     }
@@ -155,6 +167,7 @@ footer {
 
 .section-title {
     text-align: center;
+    margin-top: 5px;
     margin-bottom: 50px;
     font-weight: 600;
     color: #488AFB;
@@ -198,13 +211,16 @@ footer {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+
+
+
     .policy-tier-card:hover {
         transform: translateY(-5px);
         box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     }
 
     .policy-tier-card h3 {
-        color: #488AFB;
+        color: #012347;
     }
 
     .policy-tier-card .price {
@@ -219,10 +235,14 @@ footer {
         margin: 20px 0;
     }
 
-        .policy-tier-card ul li::before {
-            content: '✓ ';
-            color: green;
-        }
+    .policy-tier-card btn {
+        color: #4d657e;
+    }
+
+    .policy-tier-card ul li::before {
+        content: '✓ ';
+        color: green;
+    }
 
 .testimonial-card {
     background: #f8f9fa;
@@ -232,7 +252,7 @@ footer {
 }
 
 .cta-section {
-    background: #488AFB;
+    background: #4d657e;
     color: white;
     text-align: center;
     padding: 50px 0;
@@ -243,6 +263,7 @@ footer {
     }
 
 /* Animations */
+
 .animate-on-scroll.is-visible {
     animation: fadeIn 1s ease-out forwards;
 }
@@ -256,6 +277,7 @@ footer {
 }
 
 @keyframes fadeIn {
+
     from {
         opacity: 0;
     }
@@ -266,6 +288,7 @@ footer {
 }
 
 @keyframes slideInLeft {
+
     from {
         transform: translateX(-50px);
         opacity: 0;
@@ -278,6 +301,7 @@ footer {
 }
 
 @keyframes zoomIn {
+
     from {
         transform: scale(0.9);
         opacity: 0;
@@ -290,81 +314,176 @@ footer {
 }
 
 /* =======================================
+
    Login & Signup Styles (from Login.html & SignUp.html)
+
    ======================================= */
-.login-container, .signup-wrapper {
-    background-image: url('/Images/1099.jpg');
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.login-container {
+    background-image: url('/Images/authentication2.png');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
     min-height: 100vh;
-    justify-content: center;
-    align-items: center;
     display: flex;
-}
-
-.login-box, .signup-box {
-    width: 100%;
-    max-width: 400px;
-    background: rgba(255, 255, 255, 0.9);
-    border: 2px solid #3b82f6;
-    border-radius: 12px;
+    justify-content: flex-start;
+    align-items: center;
     padding: 2rem;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    animation: floating 3s ease-in-out infinite;
+    box-sizing: border-box;
 }
 
-    .login-box h4, .signup-box h4 {
-        text-align: center;
-        margin-bottom: 20px;
-        color: #3b82f6;
-    }
+.login-wrapper {
+    width: 400px;
+    padding: 2rem;
+    background: transparent; /* Remove white box */
 
-.form-control {
-    margin-bottom: 15px;
-    border-radius: 4px;
+    box-shadow: none; /* Remove shadow */
+
+    border-radius: 0; /* Remove rounded corners */
 }
 
-.btn-login, .btn-register {
-    background-color: #3b82f6;
-    color: white;
-    width: 100%;
+.login-box {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
+
+/* Text and input styling */
 
 .logo span {
     display: block;
-    text-align: center;
-    font-size: 1.5rem;
+    text-align: left;
+    font-size: 2rem;
     font-weight: bold;
-    color: #3b82f6;
+    color: #111184;
     margin-bottom: 1rem;
 }
 
-@keyframes floating {
-    0%, 100% {
+.login-box h4 {
+    text-align: left;
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: #333;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 0;
+    border: none;
+    border-bottom: 2px solid #ccc;
+    background-color: transparent !important; /* Force transparent background */
+
+    color: #333; /* Text color */
+
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+}
+
+    .form-control:focus {
+        border-bottom-color: #3b82f6;
+        outline: none;
+        box-shadow: none;
+        background-color: transparent !important; /* Ensure it stays transparent */
+    }
+
+/*.btn {
+        background-color: #012347;
+}*/
+
+.btn-login {
+    background-color: #012347;
+
+    color: white;
+    width: 100%;
+    padding: 0.9rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin-top: 1rem;
+}
+
+    .btn-login:hover {
+        background-color: #012347;
+        color:white;
+        transform: translateY(-2px);
+    }
+
+    .btn-login:active {
         transform: translateY(0);
     }
 
-    50% {
-        transform: translateY(-10px);
+.alert {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+    .login-container {
+        justify-content: center;
+    }
+
+    .login-wrapper {
+        width: 100%;
+        max-width: 400px;
+        padding: 1.5rem;
+    }
+
+    .login-box {
+        padding: 0;
     }
 }
 
+
 /* =======================================
+
    Contact Page Styles (from contact.html)
+
    ======================================= */
+
 .contact-section {
     margin-top: 40px;
     background-color: #f8f9fa;
     padding: 40px;
-    border-left: 5px solid #488AFB;
+    border-left: 5px solid #344f6c;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     animation: fadeInUp 1s ease-out;
 }
 
     .contact-section h2 {
-        color: #488AFB;
+        color: #344f6c;
         font-weight: bold;
         margin-bottom: 20px;
     }
@@ -378,6 +497,7 @@ footer {
 }
 
 @keyframes fadeInUp {
+
     0% {
         transform: translateY(30px);
         opacity: 0;
@@ -390,8 +510,11 @@ footer {
 }
 
 /* =======================================
+
    Benefits Page Styles (from benefits.html)
+
    ======================================= */
+
 :root {
     --primary-color: #488AFB;
     --gradient-bg: linear-gradient(to right, #eaf3ff, #ffffff);
@@ -399,7 +522,7 @@ footer {
 
 .section-title {
     text-align: center;
-    color: var(--primary-color);
+    color: #344f6c;
     font-weight: 700;
     margin: 50px 0 20px;
 }
@@ -457,26 +580,27 @@ footer {
 }
 
 /* Scrollbar styles for policy cards in Accidental Insurance section */
+
 .row.g-4.flex-nowrap {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
-    scrollbar-color: #488AFB #f8f9fa;
+    scrollbar-color: #012347;
 }
 
-.row.g-4.flex-nowrap::-webkit-scrollbar {
-    height: 8px;
-}
+    .row.g-4.flex-nowrap::-webkit-scrollbar {
+        height: 8px;
+    }
 
-.row.g-4.flex-nowrap::-webkit-scrollbar-thumb {
-    background: #488AFB;
-    border-radius: 4px;
-}
+    .row.g-4.flex-nowrap::-webkit-scrollbar-thumb {
+        background: #488AFB;
+        border-radius: 4px;
+    }
 
-.row.g-4.flex-nowrap::-webkit-scrollbar-track {
-    background: #f8f9fa;
-    border-radius: 4px;
-}
+    .row.g-4.flex-nowrap::-webkit-scrollbar-track {
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
 
 .policy-scroll-wrapper {
     overflow-x: auto;
@@ -487,9 +611,9 @@ footer {
     scrollbar-width: none;
 }
 
-.policy-scroll-wrapper::-webkit-scrollbar {
-    display: none;
-}
+    .policy-scroll-wrapper::-webkit-scrollbar {
+        display: none;
+    }
 
 .policy-scroll-row {
     display: flex;
@@ -498,6 +622,7 @@ footer {
 }
 
 /*Nav bar toggler styling*/
+
 .navbar-toggler {
     border-color: #fff;
 }

@@ -1,0 +1,138 @@
+﻿@model List<Insuranceclaim.Models.SupportTicket>
+@{
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
+    ViewData["Title"] = "Support";
+    ViewBag.Page = "Support";
+}
+
+<div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered border-0">
+        <div class="modal-content text-center">
+            <div class="modal-body py-4">
+                <h5 id="modal-message-content">
+                </h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid ">
+    <div class="mb-5">
+        <h2>Customer Support</h2>
+        <p class="lead-text">Need help? Contact our support team or create a new ticket.</p>
+        <div class="row">
+            <div class="col-md-8 col-lg-6">
+                <div class="card-policy p-4">
+                    <div class="mb-3">
+                        <p class="mb-2"><strong>Email:</strong> <a href="mailto:support@healthinsurance.com" class="text-decoration-none text-primary">support@healthinsurance.com</a></p>
+                        <p class="mb-2"><strong>Phone:</strong> <a href="tel:1-800-432-584" class="text-decoration-none text-primary">1-800-HEALTH (1-800-432-584)</a></p>
+                        <p class="mb-0"><strong>Hours:</strong> Monday - Friday, 9 AM - 6 PM</p>
+                    </div>
+                    <button class="btn btn-enroll mt-4" data-bs-toggle="modal" data-bs-target="#supportTicketModal">Create Support Ticket</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <h2>My Support Tickets</h2>
+        <div class="card-policy p-4">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Issue Description</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Creation Date</th>
+                            <th scope="col">Response</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var ticket in Model)
+                        {
+                            string statusBadgeClass = "";
+                            if (ticket.TicketStatus == "Open")
+                            {
+                                statusBadgeClass = "bg-warning"; // Solid orange for "Open"
+                            }
+                            else if (ticket.TicketStatus == "Resolved")
+                            {
+                                statusBadgeClass = "bg-success"; // Solid green for "Closed"
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="4">No support tickets found.</td>
+                                </tr>
+                            }
+
+                            <tr>
+                                <td>@ticket.IssueDescription</td>
+                                <td><span class="badge @statusBadgeClass">@ticket.TicketStatus</span></td>
+                                <td>@(ticket.CreatedDate?.ToShortDateString())</td>
+                                <td>@ticket.Response</td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="supportTicketModal" tabindex="-1" aria-labelledby="supportTicketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="supportTicketModalLabel">Create a New Support Ticket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="support-ticket-form" asp-action="CreateSupportTicket" asp-controller="AgentPolicies" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="targetUserId" value="@ViewBag.TargetUserId" />
+
+                    <div class="mb-3">
+                        <label for="issueDescription" class="form-label">Describe the issue</label>
+<textarea class="form-control" id="issueDescription" name="IssueDescription" rows="4" placeholder="Please provide details about your issue..." required></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Submit Ticket</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+
+            const successMessage = '@(TempData["SuccessMessage"])';
+
+            if (successMessage) {
+                // Get the modal and the element for its message
+                const modalElement = document.getElementById('successModal');
+                const modalMessageContent = document.getElementById('modal-message-content');
+
+                // Set the message inside the modal
+                modalMessageContent.innerText = '✅ ' + successMessage;
+
+                // Create a new Bootstrap modal instance and show it
+                const successModal = new bootstrap.Modal(modalElement);
+                successModal.show();
+
+                // Set a timer to automatically hide the modal after 2 seconds ⏰
+                setTimeout(function() {
+                    successModal.hide();
+                }, 1000); // 1000 milliseconds = 1 second
+            }
+        });
+    </script>
+}

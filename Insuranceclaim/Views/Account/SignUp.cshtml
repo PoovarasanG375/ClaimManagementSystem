@@ -3,13 +3,14 @@
     ViewBag.Page = "signup";
 }
 
-<div class="signup-wrapper">
-    <div class="signup-box">
-        <div class="logo">
-            <span>The Healthy Mind</span>
-        </div>
-        <h4>Register</h4>
-        <form method="post" asp-controller="Account" asp-action="SignUp">
+<div class="login-container">
+    <div class="login-wrapper">
+        <div class="login-box">
+            <div class="logo">
+                <span>Welcome!Sign Up to Get Started</span>
+            </div>
+
+
             @if (ViewBag.SuccessMessage != null)
             {
                 <div class="alert alert-success">@ViewBag.SuccessMessage</div>
@@ -18,26 +19,26 @@
             {
                 <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
             }
-            <label>User Type</label>
-            <select id="userType" name="userType" class="form-control" required>
-                <option value="">-- Select User Type --</option>
-                <option value="Agent">Agent</option>
-                <option value="POLICY HOLDER">Policy Holder</option>
-            </select>
+            <form method="post" asp-action="SignUp">
 
-            <label>Email</label>
-            <input type="email" name="Email" class="form-control" placeholder="Enter Email" required />
+                <div class="form-group">
+                    <input type="email" name="Email" class="form-control" placeholder="Enter Email" required />
+                </div>
 
-            <label>Username</label>
-            <input type="text" name="username" class="form-control" placeholder="Enter username" required />
+                <div class="form-group">
+                    <input type="text" name="username" class="form-control" placeholder="Enter username" required />
+                </div>
 
-            <label>Create Password</label>
-            <input type="password" name="password" class="form-control" placeholder="Create password" required />
+                <div class="form-group">
+                    <input type="password" name="password" class="form-control" placeholder="Create password" required />
+                </div>
 
-            <label>Re-enter Password</label>
-            <input type="password" name="confirmPassword" class="form-control" placeholder="Re-enter password" required />
+                <div class="form-group">
+                    <input type="password" name="confirmPassword" class="form-control" placeholder="Re-enter password" required />
+                </div>
 
-            <button type="submit" class="btn btn-register mt-3">Register</button>
-        </form>
+                <button type="submit" class="btn btn-login">Register</button>
+            </form>
+        </div>
     </div>
 </div>

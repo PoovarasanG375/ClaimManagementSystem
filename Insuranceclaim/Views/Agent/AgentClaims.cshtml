@@ -1,0 +1,183 @@
+﻿@model List<Insuranceclaim.Models.Claim>
+@{
+    Layout = "~/Views/Shared/_AgentLayout.cshtml";
+    ViewData["Title"] = "My Claims";
+    ViewBag.Page = "MyClaims";
+}
+
+<div class="container-fluid">
+    <h2>My Claims</h2>
+    <p class="lead-text">Track the status of your submitted claims</p>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+
+    <div id="my-claims-container">
+        @if (!Model.Any())
+        {
+            <div class="card-policy p-4"><p class="text-muted mb-0">You have not submitted any claims yet.</p></div>
+        }
+        else
+        {
+            <div class="card-policy p-4">
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Policy</th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">Incident Date</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var claim in Model)
+                            {
+                                string statusBadgeClass = "";
+                                if (claim.ClaimStatus == "Pending")
+                                {
+                                    statusBadgeClass = "bg-warning";
+                                }
+                                else if (claim.ClaimStatus == "pending admin review")
+                                {
+                                    statusBadgeClass = "custom-pending-admin-review";
+                                }
+                                else if (claim.ClaimStatus == "Rejected")
+                                {
+                                    statusBadgeClass = "bg-danger";
+                                }
+                                else if (claim.ClaimStatus == "Approved")
+                                {
+                                    statusBadgeClass = "bg-success";
+                                }
+
+                                <tr>
+                                    <td>@claim.Policy?.PolicyName</td>
+                                    <td>@claim.ClaimAmount</td>
+                                    <td>@claim.ClaimDate?.ToString("yyyy-MM-dd")</td>
+                                    <td><span class="badge @statusBadgeClass  text-black">@claim.ClaimStatus</span></td>
+                                    <td>
+                                        <button type="button" class="btn btn-outline-primary btn-sm view-details"
+                                                data-claim-id="@claim.ClaimId"
+                                                data-user-id="@ViewBag.TargetUserId"
+                                                data-bs-toggle="modal" data-bs-target="#claimDetailsModal">
+                                            <i class="bi bi-eye"></i> Details
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="claimDetailsModal" tabindex="-1" aria-labelledby="claimDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="claimDetailsModalLabel">Claim Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="claim-details-content">
+                    <p><strong>Policy:</strong> <span id="cd-policy-name"></span></p>
+                    <p><strong>Amount:</strong> <span id="cd-amount"></span></p>
+                    <p><strong>Incident Date:</strong> <span id="cd-date"></span></p>
+                    <p><strong>Status:</strong> <span id="cd-status"></span></p>
+                    <p><strong>Adjuster Notes:</strong> <span id="cd-adjuster-notes"></span></p>
+                    <p><strong>Admin Notes:</strong> <span id="cd-admin-notes"></span></p>
+
+                    <div>
+                        <strong>Documents:</strong>
+                        <ul id="cd-documents" class="list-unstyled ms-2"></ul>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form id="resubmitForm" asp-controller="AgentPolicies" asp-action="ResubmitClaim" method="post" class="d-inline">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" id="resubmit-claim-id" name="claimId" value="" />
+                    <input type="hidden" id="resubmit-user-id" name="targetUserId" /> 
+                    <button type="submit" id="resubmit-btn" class="btn btn-primary">Resubmit Claim</button>
+                </form>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(function () {
+            $('#claimDetailsModal').on('show.bs.modal', function (e) {
+                var btn = $(e.relatedTarget);
+                var claimId = btn.data('claim-id');
+                var targetUserId = btn.data('user-id');
+
+                if (!claimId) return;
+
+                // Clear previous
+                $('#cd-policy-name').text('');
+                $('#cd-amount').text('');
+                $('#cd-date').text('');
+                $('#cd-status').text('');
+                $('#cd-adjuster-notes').text('');
+                $('#cd-admin-notes').text('');
+                $('#cd-documents').empty();
+                $('#resubmit-claim-id').val('');
+                $('#resubmit-btn').hide();
+
+                // Fetch details
+                $.getJSON('/AgentPolicies/GetClaimDetails', { id: claimId, userId: targetUserId })
+                    .done(function (data) {
+                        $('#cd-policy-name').text(data.policyName || '');
+                        if (data.claimAmount != null) {
+                            var formatted = '₹' + new Intl.NumberFormat('en-IN').format(data.claimAmount);
+                            $('#cd-amount').text(formatted);
+                        }
+                        $('#cd-date').text(data.claimDate || '');
+                        $('#cd-status').text(data.status || '');
+                        $('#cd-adjuster-notes').text(data.adjusterNotes || '');
+                        $('#cd-admin-notes').text(data.adminNotes || '');
+
+                        if (data.documents && data.documents.length) {
+                            data.documents.forEach(function (doc) {
+                                // Check if the document's path already exists in the list to prevent duplicates
+                                if ($('#cd-documents a[href="' + (doc.DocumentPath || doc.documentPath) + '"]').length === 0) {
+                                    var li = $('<li/>');
+                                    var a = $('<a/>').attr('href', doc.DocumentPath || doc.documentPath || '#').attr('target', '_blank').text(doc.DocumentName || doc.documentName || 'Document');
+                                    li.append(a);
+                                    $('#cd-documents').append(li);
+                                }
+                            });
+                        }
+
+                        if (data.status && data.status.toLowerCase() === 'rejected') {
+                            $('#resubmit-claim-id').val(data.claimId);
+                            $('#resubmit-user-id').val(targetUserId);
+                            $('#resubmit-btn').show();
+                        }
+                    })
+                    .fail(function () {
+                        $('#cd-policy-name').text('Error loading details');
+                    });
+            });
+
+            $('#resubmitForm').on('submit', function (e) {
+                var claimId = $('#resubmit-claim-id').val();
+                if (!claimId) {
+                    e.preventDefault();
+                    return;
+                }
+            });
+        });
+    </script>
+}

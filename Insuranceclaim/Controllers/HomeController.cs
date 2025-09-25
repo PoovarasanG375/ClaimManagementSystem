@@ -14,7 +14,7 @@ namespace Insuranceclaim.Controllers
         {
             return View();
         }
-
+        // update
         public IActionResult Contact()
         {
             return View();

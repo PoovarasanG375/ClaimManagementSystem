@@ -1,0 +1,207 @@
+﻿@model IEnumerable<Insuranceclaim.Models.SupportTicket>
+
+@{
+
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    ViewData["Title"] = "Support Tickets";
+
+}
+
+<style>
+
+    /* New Styles for the Support Tickets Index Page */
+
+    :root {
+        --primary-blue: #3498db;
+        --secondary-gray: #7f8c8d;
+        --background-light: #f5f7fa;
+        --card-bg: #ffffff;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --text-dark: #2c3e50;
+    }
+
+    body {
+        /* Using a system font stack for a clean, fast-loading look */
+
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        background-color: var(--background-light);
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+
+    h2 {
+        font-weight: 600;
+        color: var(--text-dark);
+        border-bottom: 2px solid var(--primary-blue);
+        padding-bottom: 0.5rem;
+    }
+
+    .filter-section {
+        background-color: var(--card-bg);
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: var(--card-shadow);
+    }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.85rem;
+    }
+
+    .status-resolved {
+        background-color: #2ecc71; /* Green */
+
+        color: #fff;
+    }
+
+    .status-open {
+        background-color: #ffc107; /* Red */
+
+        color: #fff;
+    }
+
+    .table-responsive {
+        margin-top: 1.5rem;
+    }
+
+    .table th, .table td {
+        white-space: nowrap;
+        vertical-align: middle;
+        padding: 1rem; /* Added padding for more space */
+    }
+
+        /* Adjust column widths for better readability */
+
+        .table th:nth-child(1), .table td:nth-child(1) { /* Username */
+
+            width: 15%;
+        }
+
+        .table th:nth-child(2), .table td:nth-child(2) { /* Issue Description */
+
+            width: 45%;
+            white-space: normal; /* Allow text wrapping for long descriptions */
+        }
+
+        .table th:nth-child(3), .table td:nth-child(3) { /* Status */
+
+            width: 15%;
+        }
+
+        .table th:nth-child(4), .table td:nth-child(4) { /* Created Date */
+
+            width: 15%;
+        }
+
+        .table th:nth-child(5), .table td:nth-child(5) { /* Actions */
+
+            width: 10%;
+        }
+
+    /* Hover effect for table rows */
+
+    .table tbody tr:hover {
+        background-color: #f0f2f5; /* Lighter background on hover */
+
+        transition: background-color 0.3s ease;
+    }
+
+    /* Center the arrow icon and make the entire cell clickable */
+
+    .action-cell {
+        text-align: center;
+        position: relative;
+    }
+
+    .action-link {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        text-decoration: none;
+        font-size: 1.5rem; /* Make the arrow larger for better visibility */
+
+        font-weight: bold; /* Make the arrow thicker */
+
+        line-height: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-blue) !important; /* Changed color to primary-blue for consistency */
+    }
+</style>
+
+<div class="support-content">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-4">
+        <h2>Support Tickets</h2>
+    </div>
+
+    <div class="filter-section d-flex justify-content-center gap-3 mb-4">
+        <a asp-action="Index" asp-route-statusFilter="All" class="btn @(string.IsNullOrEmpty(ViewBag.StatusFilter) || ViewBag.StatusFilter == "All" ? "btn-primary" : "btn-outline-primary")">All</a>
+        <a asp-action="Index" asp-route-statusFilter="Open" class="btn @(ViewBag.StatusFilter == "Open" ? "btn-primary" : "btn-outline-primary")">Open</a>
+        <a asp-action="Index" asp-route-statusFilter="Resolved" class="btn @(ViewBag.StatusFilter == "Resolved" ? "btn-primary" : "btn-outline-primary")">Resolved</a>
+    </div>
+
+    <div class="table-responsive">
+
+        @if (Model.Any())
+
+        {
+            <table class="table table-hover table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Issue Description</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                        <th class="text-center">Details</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @foreach (var ticket in Model)
+
+                    {
+                        <tr>
+                            <td>@ticket.User?.Username</td>
+                            <td>@ticket.IssueDescription</td>
+                            <td>
+                                <span class="status-badge @(ticket.TicketStatus?.ToLower() == "resolved" ? "status-resolved" : "status-open")">
+
+                                    @ticket.TicketStatus
+                                </span>
+                            </td>
+                            <td>@ticket.CreatedDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="action-cell">
+                                <a asp-controller="AdminSupportTickets" asp-action="Details" asp-route-id="@ticket.TicketId" class="action-link">
+
+                                    →
+                                </a>
+                            </td>
+                        </tr>
+
+                    }
+                </tbody>
+            </table>
+
+        }
+
+        else
+
+        {
+            <div class="alert alert-info text-center">
+
+                No support tickets found for the selected status.
+            </div>
+
+        }
+    </div>
+</div>
+

@@ -1,0 +1,180 @@
+﻿@if (TempData["ErrorMessage"] != null)
+
+{
+    <div class="alert alert-danger" role="alert">
+
+        @TempData["ErrorMessage"]
+    </div>
+
+}
+
+@model Insuranceclaim.Models.SupportTicket
+
+@{
+
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    ViewData["Title"] = "Ticket Details";
+
+}
+
+<style>
+
+    /* Final Styles for the single-card Details page */
+
+    :root {
+        --primary-blue: #3498db;
+        --background-light: #f5f7fa;
+        --card-bg: #ffffff;
+        --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        --text-dark: #2c3e50;
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+        background-color: var(--background-light);
+    }
+
+    .container {
+        padding: 2.5rem;
+    }
+
+    .details-card {
+        background-color: var(--card-bg);
+        border-left: 5px solid var(--primary-blue);
+        border-radius: 8px;
+        box-shadow: var(--card-shadow);
+        padding: 2rem;
+        transition: transform 0.3s ease-in-out;
+    }
+
+        .details-card:hover {
+            transform: translateY(-3px);
+        }
+
+        .details-card h3 {
+            color: var(--text-dark);
+            font-weight: 600;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+            .details-card h3:first-of-type {
+                margin-top: 0;
+            }
+
+    .status-badge {
+        padding: 0.4rem 0.8rem;
+        border-radius: 20px;
+        font-weight: bold;
+        font-size: 0.9rem;
+        color: #fff;
+    }
+
+    .status-open {
+        background-color: #e74c3c;
+    }
+
+    .status-resolved {
+        background-color: #2ecc71;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+    }
+
+    .form-control, .form-select {
+        border-radius: 8px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.06);
+    }
+
+    .btn-primary {
+        background-color: var(--primary-blue);
+        border-color: var(--primary-blue);
+        transition: background-color 0.3s ease-in-out;
+    }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+            border-color: #2980b9;
+        }
+
+    .btn-secondary {
+        background-color: #7f8c8d;
+        border-color: #7f8c8d;
+        transition: background-color 0.3s ease-in-out;
+    }
+
+        .btn-secondary:hover {
+            background-color: #616e78;
+            border-color: #616e78;
+        }
+</style>
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Ticket</h2>
+        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
+    </div>
+
+    <div class="details-card">
+        <h3>Ticket Information</h3>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Customer:</strong> @Model.User?.Username</p>
+                <p><strong>Created:</strong> @Model.CreatedDate?.ToShortDateString()</p>
+                <p><strong>Description:</strong> @Model.IssueDescription</p>
+            </div>
+            <div class="col-md-6 text-md-end">
+                <p>
+                    <strong>Status:</strong>
+                    <span class="status-badge @(Model.TicketStatus?.ToLower() == "resolved" ? "status-resolved" : "status-open")">
+
+                        @Model.TicketStatus
+                    </span>
+                </p>
+            </div>
+        </div>
+
+        <h3>Admin Response & Action</h3>
+
+        @{
+
+            var hasResponse = !string.IsNullOrEmpty(Model.Response);
+
+        }
+
+        @if (hasResponse)
+
+        {
+            <div class="alert alert-info" role="alert">
+
+                This ticket has been resolved. No further action is required.
+            </div>
+            <p><strong>Response Provided:</strong></p>
+            <p>@Model.Response</p>
+
+        }
+
+        else
+
+        {
+            <form asp-action="UpdateTicket" method="post">
+                <input type="hidden" name="ticketId" value="@Model.TicketId" />
+
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label for="responseMessage" class="form-label">Add Response</label>
+    <textarea name="responseMessage" class="form-control" rows="4"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+            </form>
+
+        }
+    </div>
+</div>
+

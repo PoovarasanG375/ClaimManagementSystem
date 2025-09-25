@@ -19,6 +19,14 @@ public partial class Policy
 
     public string? PolicyName { get; set; }
 
+    public int? AnnualPremium { get; set; }
+
+    public string? Description { get; set; }
+
+    public string? Category { get; set; }
+
+    public virtual ICollection<AppliedPolicy> AppliedPolicies { get; set; } = new List<AppliedPolicy>();
+
     public virtual ICollection<Claim> Claims { get; set; } = new List<Claim>();
 
     public virtual User? Policyholder { get; set; }

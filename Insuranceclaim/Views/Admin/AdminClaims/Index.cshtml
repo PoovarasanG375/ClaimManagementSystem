@@ -1,0 +1,301 @@
+﻿@model IEnumerable<Insuranceclaim.Models.Claim>
+
+@{
+
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    ViewData["Title"] = "Claim Management Dashboard";
+
+}
+
+<link rel="stylesheet" href="~/css/claim.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+<div class="container-fluid py-4 px-3">
+    <div data-main-content>
+        <div class="mb-4">
+            <div class="claim-header">Claim Management</div>
+            <div class="claim-subtitle">Monitor and manage insurance claims.</div>
+        </div>
+
+        <div class="mb-4">
+            <form asp-controller="AdminClaims" asp-action="Index" method="get" class="d-inline-block">
+                <select id="statusFilter" name="status" class="form-select w-auto rounded-md" data-selected="@(ViewBag.SelectedStatus ?? "Pending Admin Review")" onchange="this.form.submit()">
+                    <option value="All">All Claims</option>
+                    <option value="Cancelled">Cancelled</option>
+                    <option value="Pending Admin Review">Pending Admin Review</option>
+                    <option value="Rejected">Rejected</option>
+                    <option value="Approved">Approved</option>
+                </select>
+            </form>
+        </div>
+
+        @if (Model != null && Model.Any())
+
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead>
+                        <tr>
+                            <th scope="col">Policy</th>
+                            <th scope="col">Policyholder</th>
+                            <th scope="col">Claim Amount</th>
+                            <th scope="col">Submitted Date</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+
+                        @foreach (var item in Model)
+
+                        {
+                            <tr class="claim-list-item"
+                                data-claim-id="@item.ClaimId"
+                                data-claim-amount="@item?.ClaimAmount"
+                                data-coverage-amount="@item?.Policy?.CoverageAmount"
+                                data-claim-date="@item?.ClaimDate?.ToString("d/M/yyyy")"
+                                data-claim-status="@item?.ClaimStatus"
+                                data-policy-name="@item?.Policy?.PolicyName"
+                                data-policyholder-name="@item?.User?.Username"
+                                data-adjuster-name="@item?.Adjuster?.Username"
+                                data-description-of-incident="@item?.DescriptionofIncident"
+                                data-adjuster-notes="@item?.AdjusterNotes"
+                                data-admin-notes="@item?.AdminNotes">
+                                <td>@Html.DisplayFor(modelItem => item.Policy.PolicyName)</td>
+                                <td>@Html.DisplayFor(modelItem => item.User.Username)</td>
+                                <td>₹@item?.ClaimAmount?.ToString("N0")</td>
+                                <td>@item?.ClaimDate?.ToString("d/M/yyyy")</td>
+                                <td>
+                                    <span class="status-badge status-@item?.ClaimStatus?.ToLower()">@item?.ClaimStatus</span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-outline-primary view-btn" data-bs-toggle="modal" data-bs-target="#claimModal"><i class="bi bi-eye"></i> View</button>
+                                </td>
+                            </tr>
+
+                        }
+                    </tbody>
+                </table>
+            </div>
+
+        }
+
+        else
+
+        {
+            <div class="alert alert-info text-center">
+
+                No claims found with the selected status.
+            </div>
+
+        }
+
+        <div class="modal fade" id="claimModal" tabindex="-1" aria-labelledby="claimModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="claimModalLabel">Claim Details</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="claimDetails">
+                            <p><strong>Policyholder:</strong> <span id="modal-policyholder-name"></span></p>
+                            <p><strong>Policy:</strong> <span id="modal-policy-name"></span></p>
+                            <p><strong>Claim Amount:</strong> <span id="modal-claim-amount"></span></p>
+                            <p><strong>Coverage Amount:</strong> <span id="modal-coverage-amount"></span></p>
+                            <p><strong>Submitted Date:</strong> <span id="modal-submitted-date"></span></p>
+                            <p><strong>Adjuster:</strong> <span id="modal-adjuster-name"></span></p>
+                            <p><strong>Description of Incident:</strong> <span id="modal-description-of-incident"></span></p>
+                            <p><strong>Adjuster Notes:</strong> <span id="modal-adjuster-notes"></span></p>
+                            <p><strong>Current Status:</strong> <span id="modal-current-status"></span></p>
+                        </div>
+
+                        <div class="form-group mt-3">
+                            <label for="adminNotesTextarea">Admin Notes:</label>
+<textarea class="form-control" id="adminNotesTextarea" rows="3"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="statusSelect" class="mt-3">Change Status:</label>
+                            <select id="statusSelect" class="form-select">
+                                <option value="Approved">Approved</option>
+                                <option value="Rejected">Rejected</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success" id="saveStatus">Save changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            // set selected option based on data-selected attribute
+            var sel = $('#statusFilter');
+            var selected = sel.data('selected');
+            if (selected) {
+                sel.val(selected);
+            }
+
+            var currentClaimId;
+
+            $('.view-btn').on('click', function () {
+
+                var row = $(this).closest('tr');
+
+                currentClaimId = row.data('claim-id');
+
+                // Get all data from the row
+
+                var claimData = {
+
+                    policyholderName: row.data('policyholder-name'),
+
+                    policyName: row.data('policy-name'),
+
+                    claimAmount: row.data('claim-amount'),
+
+                    coverageAmount: row.data('coverage-amount'),
+
+                    submittedDate: row.data('claim-date'),
+
+                    adjusterName: row.data('adjuster-name'),
+
+                    description: row.data('description-of-incident'),
+
+                    adjusterNotes: row.data('adjuster-notes'),
+
+                    adminNotes: row.data('admin-notes'),
+
+                    status: row.data('claim-status')
+
+                };
+
+                // Populate the read-only details in the modal
+
+                $('#modal-policyholder-name').text(claimData.policyholderName);
+
+                $('#modal-policy-name').text(claimData.policyName);
+
+                $('#modal-claim-amount').text('₹' + new Intl.NumberFormat('en-IN').format(claimData.claimAmount));
+
+                $('#modal-coverage-amount').text('₹' + new Intl.NumberFormat('en-IN').format(claimData.coverageAmount));
+
+                $('#modal-submitted-date').text(claimData.submittedDate);
+
+                $('#modal-adjuster-name').text(claimData.adjusterName);
+
+                $('#modal-description-of-incident').text(claimData.description);
+
+                $('#modal-adjuster-notes').text(claimData.adjusterNotes);
+
+                $('#modal-current-status').text(claimData.status);
+
+                // Check the claim status and adjust the modal UI
+
+                if (claimData.status === 'Approved' || claimData.status === 'Rejected' || claimData.status === 'Cancelled'){
+
+                    // Show read-only admin notes and hide the form fields
+
+                    $('#adminNotesTextarea').val(claimData.adminNotes).prop('disabled', true);
+
+                    $('#statusSelect').val(claimData.status).prop('disabled', true);
+
+                    $('#saveStatus').hide();
+
+                } else {
+
+                    // Claim is not yet approved/rejected, show the form fields and populate with existing notes
+
+                    $('#adminNotesTextarea').val(claimData.adminNotes).prop('disabled', false);
+
+                    $('#statusSelect').val(claimData.status === 'Pending_Admin_Review' ? 'Approved' : claimData.status).prop('disabled', false);
+
+                    $('#saveStatus').show();
+
+                }
+
+            });
+
+            $('#saveStatus').on('click', function () {
+
+                var newStatus = $('#statusSelect').val();
+
+                var adminNotes = $('#adminNotesTextarea').val();
+
+                var postData = {
+
+                    claimId: currentClaimId,
+
+                    status: newStatus,
+
+                    adminNotes: adminNotes
+
+                };
+
+                $.ajax({
+
+                    url: '/Claim/UpdateClaimStatus',
+
+                    type: 'POST',
+
+                    contentType: 'application/json',
+
+                    data: JSON.stringify(postData),
+
+                    headers: {
+
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+
+                    },
+
+                    success: function (response) {
+
+                        if (response.success) {
+
+                            alert('Claim status updated successfully! ✅');
+
+                            $('#claimModal').modal('hide');
+
+                            location.reload();
+
+                        } else {
+
+                            alert('Error: ' + response.message);
+
+                        }
+
+                    },
+
+                    error: function (xhr, status, error) {
+
+                        alert("This is the current claim ID : " + currentClaimId);
+
+                        alert('An error occurred while updating the claim status. ❌');
+
+                        console.error(xhr.responseText);
+
+                    }
+
+                });
+
+            });
+
+        });
+    </script>
+
+    @Html.AntiForgeryToken()
+
+}
